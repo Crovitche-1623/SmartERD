@@ -39,3 +39,9 @@ These are used to have a model of the database while ignoring the RDBMS used.
     $   symfony serve --no-tls --no-ansi
     ```
  8. Open a browser and access the application with the given URL and enjoy !
+ 
+## Tests
+Execute this command to run tests:
+```
+$   php bin/phpunit
+```

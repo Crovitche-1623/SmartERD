@@ -9,7 +9,7 @@ use Doctrine\Persistence\ObjectManager;
 
 class UserFixtures extends BaseFixture
 {
-    private const DEFAULT_USER_PASSWORD = 'SmartERD';
+    public const DEFAULT_USER_PASSWORD = '5m4rt3RD_P4$$w0rd';
 
     /**
      * {@inheritDoc}

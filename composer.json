@@ -21,9 +21,11 @@
         "symfony/yaml": "5.0.*"
     },
     "require-dev": {
+        "dama/doctrine-test-bundle": "^6.3",
         "doctrine/doctrine-fixtures-bundle": "^3.3",
         "fzaninotto/faker": "^1.9",
-        "symfony/maker-bundle": "^1.14"
+        "symfony/maker-bundle": "^1.14",
+        "symfony/phpunit-bridge": "^5.0"
     },
     "config": {
         "preferred-install": {

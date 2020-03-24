@@ -9,7 +9,12 @@
 /vendor/
 ###< symfony/framework-bundle ###
 
-
 ###> Remove the IDE config folder ###
 /.idea/
 ###< Remove the IDE config folder ###
+
+###> symfony/phpunit-bridge ###
+.phpunit
+.phpunit.result.cache
+/phpunit.xml
+###< symfony/phpunit-bridge ###
