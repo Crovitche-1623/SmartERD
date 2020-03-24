@@ -8,3 +8,8 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+
+###> Remove the IDE config folder ###
+/.idea/
+###< Remove the IDE config folder ###
