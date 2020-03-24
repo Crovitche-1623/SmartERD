@@ -33,9 +33,17 @@ class User implements UserInterface
     private bool $isAdmin = false;
 
     /**
+     * This value isn't stored in the database. The password is hashed when data
+     * are persisted.
+     *
+     *
+     */
+    private ?string $plainPassword = null;
+
+    /**
      * @ORM\Column(length = 180)
      */
-    private string $password = '';
+    private string $hashedPassword = '';
 
     /**
      * @ORM\Column(length = 180, unique = true)
@@ -98,12 +106,24 @@ class User implements UserInterface
      */
     public function getPassword(): string
     {
-        return (string) $this->password;
+        return (string) $this->hashedPassword;
     }
 
-    public function setPassword(string $password): self
+    public function setHashedPassword(string $hashedPassword): self
     {
-        $this->password = $password;
+        $this->hashedPassword = $hashedPassword;
+
+        return $this;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
 
         return $this;
     }
@@ -111,7 +131,7 @@ class User implements UserInterface
     /**
      * {@inheritDoc}
      */
-    public function getSalt()
+    public function getSalt(): ?string
     {
         // not needed when using the "bcrypt" algorithm in security.yaml
     }
@@ -119,10 +139,10 @@ class User implements UserInterface
     /**
      * {@inheritDoc}
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         // If you store any temporary, sensitive data on the user, clear it here
-        // $this->plainPassword = null;
+        $this->plainPassword = null;
     }
 
     public function getEmail(): string
