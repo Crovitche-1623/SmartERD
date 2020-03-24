@@ -9,6 +9,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @ORM\Entity(repositoryClass = "App\Repository\UserRepository")
+ *
+ * To avoid the USER reserved SQL word, table must be renamed.
+ * @ORM\Table(name = "member")
  */
 class User implements UserInterface
 {
@@ -49,6 +52,11 @@ class User implements UserInterface
      * @ORM\Column(length = 180, unique = true)
      */
     private string $email = '';
+
+    public function __toString(): string
+    {
+        return $this->username;
+    }
 
     public function getId(): ?int
     {
@@ -134,6 +142,7 @@ class User implements UserInterface
     public function getSalt(): ?string
     {
         // not needed when using the "bcrypt" algorithm in security.yaml
+        return null;
     }
 
     /**
