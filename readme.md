@@ -1,0 +1,41 @@
+# SmartERD
+SmartERD is a Symfony project designed to create Entity Relationship Diagrams. 
+These are used to have a model of the database while ignoring the RDBMS used.
+
+***Disclaimer: SmartERD is still in development mode.***
+
+## Requirements
+ * PHP 7.4.3 or higher;
+ * PostgreSQL 10.11-1 or higher (The proper functioning of other RDBMS is not guaranteed);
+ * PDO-PGSQL PHP Extension Enabled;
+ * The [Symfony Binary](https://symfony.com/download) if you want to run the project in development mode;
+ * and the usual [Symfony application requirements](https://symfony.com/doc/current/reference/requirements.html).
+ 
+## Setup
+ 1. Get into the project directory:
+    ```
+    $   cd SmartERD/
+    ```
+ 2. Modify the DATABASE_URL config in .env if necessary and start PostgreSQL.
+ 3. (optional) Drop the existing database if it already exist:
+    ```
+    $   php bin/console d:d:d --if-exists --force
+    ```
+ 4. Create the database:
+    ```
+    $   php bin/console d:d:c
+    ```
+ 5. Create the database schema:
+    ```
+    $   php bin/console d:s:c
+    ```
+ 6. Load the fixtures:
+    ```
+    $   php bin/console d:f:l -n
+    ```
+ 7. Start the application using the Symfony binary and don't forget to add the
+    "--no-ansi" flag if you're working on Windows:
+    ```
+    $   symfony serve --no-tls --no-ansi
+    ```
+ 8. Open a browser and access the application with the given URL and enjoy !
