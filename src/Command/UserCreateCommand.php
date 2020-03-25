@@ -91,11 +91,12 @@ class UserCreateCommand extends Command
 
         if ($ok) {
             try {
-                $this->em->persist((new User())
-                    ->setUsername($username)
-                    ->setEmail($email)
-                    ->setIsAdmin($isAdmin)
-                    ->setPlainPassword($plainPassword)
+                $this->em->persist(
+                    (new User())
+                        ->setUsername($username)
+                        ->setEmail($email)
+                        ->setIsAdmin($isAdmin)
+                        ->setPlainPassword($plainPassword)
                 );
                 $this->em->flush();
                 $io->success(sprintf('The user %s has been created', $username));
