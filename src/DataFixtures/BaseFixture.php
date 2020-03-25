@@ -6,7 +6,7 @@ namespace App\DataFixtures;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Faker\{Factory,Generator};
+use Faker\{Factory, Generator};
 use InvalidArgumentException;
 use ReflectionClass,ReflectionException;
 
@@ -41,6 +41,8 @@ abstract class BaseFixture extends Fixture
     }
 
     /**
+     * TODO: Traduire en anglais
+     *
      * Afin d'avoir des références uniques et éviter des collisions, chaque référence est préfixé par le nom de la
      * classe qu'il possède. Pour s'assurer qu'il y aura jamais aucune collisions, la méthode "__toString()" doit
      * obligatoirement retourné quelque chose d'unique (ce qui caractérise la donnée).

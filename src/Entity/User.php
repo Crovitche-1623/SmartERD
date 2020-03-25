@@ -6,12 +6,14 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass = "App\Repository\UserRepository")
- *
  * To avoid the USER reserved SQL word, table must be renamed.
  * @ORM\Table(name = "member")
+ *
+ * @Assert\DisableAutoMapping
  */
 class User implements UserInterface
 {
@@ -27,11 +29,18 @@ class User implements UserInterface
 
     /**
      * @ORM\Column(length = 180, unique = true)
+     *
+     * @Assert\NotBlank
+     * @Assert\Type("string")
+     * @Assert\Length(min = 3, max = 180)
      */
     private string $username = '';
 
     /**
      * @ORM\Column(type = "boolean")
+     *
+     * @Assert\NotNull
+     * @Assert\Type("bool")
      */
     private bool $isAdmin = false;
 
@@ -39,17 +48,26 @@ class User implements UserInterface
      * This value isn't stored in the database. The password is hashed when data
      * are persisted.
      *
-     *
+     * @Assert\NotBlank
+     * @Assert\Type("string")
+     * @Assert\Length(min = 6, max = 180)
+     * @Assert\NotCompromisedPassword
      */
     private ?string $plainPassword = null;
 
     /**
      * @ORM\Column(length = 180)
+     *
+     * @Assert\DisableAutoMapping
      */
     private string $hashedPassword = '';
 
     /**
      * @ORM\Column(length = 180, unique = true)
+     *
+     * @Assert\NotBlank
+     * @Assert\Type("string")
+     * @Assert\Email
      */
     private string $email = '';
 
