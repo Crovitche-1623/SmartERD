@@ -10,6 +10,7 @@ use Doctrine\Persistence\ObjectManager;
 class UserFixtures extends BaseFixture
 {
     public const DEFAULT_USER_PASSWORD = '5m4rt3RD_P4$$w0rd';
+    public const USERS_NUMBER = 100;
 
     /**
      * {@inheritDoc}
@@ -24,7 +25,7 @@ class UserFixtures extends BaseFixture
                 ->setIsAdmin(true)
         );
 
-        $this->createMany(User::class, 100, function (User $u) {
+        $this->createMany(User::class, self::USERS_NUMBER, function (User $u) {
             $u
                 ->setUsername($this->faker->unique()->userName)
                 ->setEmail($this->faker->unique()->companyEmail)

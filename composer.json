@@ -12,22 +12,28 @@
         "ext-simplexml": "*",
         "ext-sodium": "*",
         "ext-tokenizer": "*",
+        "api-platform/api-pack": "^1.2",
         "doctrine/annotations": "^1.8",
+        "lexik/jwt-authentication-bundle": "^2.6",
         "symfony/console": "5.0.*",
         "symfony/dotenv": "5.0.*",
         "symfony/flex": "^1.3.1",
         "symfony/framework-bundle": "5.0.*",
         "symfony/orm-pack": "^1.0",
         "symfony/security-bundle": "5.0.*",
+        "symfony/serializer-pack": "^1.0",
         "symfony/validator": "5.0.*",
         "symfony/yaml": "5.0.*"
     },
     "require-dev": {
-        "dama/doctrine-test-bundle": "^6.3",
         "doctrine/doctrine-fixtures-bundle": "^3.3",
         "fzaninotto/faker": "^1.9",
+        "liip/test-fixtures-bundle": "^1.7",
+        "symfony/browser-kit": "5.0.*",
+        "symfony/http-client": "5.0.*",
         "symfony/maker-bundle": "^1.14",
-        "symfony/phpunit-bridge": "^5.0"
+        "symfony/phpunit-bridge": "^5.0",
+        "symfony/test-pack": "^1.0"
     },
     "config": {
         "preferred-install": {

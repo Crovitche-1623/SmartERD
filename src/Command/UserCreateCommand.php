@@ -11,8 +11,6 @@ use Faker\{Factory,Generator};
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputArgument, InputInterface};
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class UserCreateCommand extends Command
@@ -82,10 +80,10 @@ class UserCreateCommand extends Command
 
         $ok = $io->confirm(
             'This user will be created:' . PHP_EOL .
-            ' <fg=blue>Username:</> <fg=white>' . $username . '</>' . PHP_EOL .
-            ' <fg=blue>Email:</> <fg=white>' . $email . '</>' . PHP_EOL .
+            ' <fg=blue>Username:</> <fg=white>'         . $username                 . '</>' . PHP_EOL .
+            ' <fg=blue>Email:</> <fg=white>'            . $email                    . '</>' . PHP_EOL .
             ' <fg=blue>Is administrator:</> <fg=white>' . ($isAdmin ? 'Yes' : 'No') . '</>' . PHP_EOL .
-            ' <fg=blue>Plain password:</> <fg=white>' . $plainPassword . '</>' . PHP_EOL .
+            ' <fg=blue>Plain password:</> <fg=white>'   . $plainPassword            . '</>' . PHP_EOL .
             ' Is everything correct ?'
         );
 

@@ -1,19 +1,27 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\{ApiResource, ApiSubresource};
+use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass = "App\Repository\UserRepository")
- * To avoid the USER reserved SQL word, table must be renamed.
+ *
+ * To avoid the reserved SQL word "user", the table name is renamed
  * @ORM\Table(name = "member")
  *
- * @Assert\DisableAutoMapping
+ * The ApiResource is required for the ApiSubResource. Even if we don't have
+ * other operation.
+ * @ApiResource(
+ *     collectionOperations = {},
+ *     itemOperations = {}
+ * )
  */
 class User implements UserInterface
 {
@@ -70,6 +78,21 @@ class User implements UserInterface
      * @Assert\Email
      */
     private string $email = '';
+
+    /**
+     * @ORM\OneToMany(
+     *     targetEntity = "App\Entity\Project",
+     *     mappedBy = "user",
+     *     orphanRemoval = true
+     * )
+     * @ApiSubresource()
+     */
+    private Collection $projects;
+
+    public function __construct()
+    {
+        $this->projects = new ArrayCollection();
+    }
 
     public function __toString(): string
     {
@@ -130,9 +153,9 @@ class User implements UserInterface
     /**
      * {@inheritDoc}
      */
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
-        return (string) $this->hashedPassword;
+        return $this->hashedPassword;
     }
 
     public function setHashedPassword(string $hashedPassword): self
@@ -180,6 +203,37 @@ class User implements UserInterface
     public function setEmail(string $email): self
     {
         $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * @return  Collection|Project[]
+     */
+    public function getProjects(): Collection
+    {
+        return $this->projects;
+    }
+
+    public function addProject(Project $project): self
+    {
+        if (!$this->projects->contains($project)) {
+            $this->projects[] = $project;
+            $project->setCreatedBy($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProject(Project $project): self
+    {
+        if ($this->projects->contains($project)) {
+            $this->projects->removeElement($project);
+            // set the owning side to null (unless already changed)
+            if ($project->getCreatedBy() === $this) {
+                $project->setCreatedBy(null);
+            }
+        }
 
         return $this;
     }

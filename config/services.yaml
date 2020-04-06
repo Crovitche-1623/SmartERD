@@ -29,3 +29,8 @@ services:
         autowire: true
         tags:
             - { name: doctrine.event_subscriber }
+
+    App\Swagger\SwaggerDecorator:
+        decorates: 'api_platform.swagger.normalizer.documentation'
+        arguments: ['@App\Swagger\SwaggerDecorator.inner']
+        autoconfigure: false

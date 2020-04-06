@@ -8,7 +8,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\{Factory, Generator};
 use InvalidArgumentException;
-use ReflectionClass,ReflectionException;
+use ReflectionClass, ReflectionException;
 
 abstract class BaseFixture extends Fixture
 {
@@ -31,12 +31,13 @@ abstract class BaseFixture extends Fixture
         callable $factory
     ): void
     {
-        for ($i = 0; $i < $count; $i++) {
+        for ($i = 1; $i <= $count; $i++) {
             $entity = new $className();
             $factory($entity, $i);
             $this->manager->persist($entity);
+
             // store for usage later as App\Entity\ClassName_#COUNT#
-            $this->addSafeReference($entity);
+            $this->addReference($className . '_' . $i, $entity);
         }
     }
 
@@ -61,7 +62,7 @@ abstract class BaseFixture extends Fixture
         $function = new ReflectionClass(get_class($entity));
 
         // Return an error if the entity class doesn't have an unique toString()
-        // method.
+        // method or getId()
         if (!$function->hasMethod('__toString')) {
             throw new InvalidArgumentException(
                 sprintf(
@@ -71,10 +72,8 @@ abstract class BaseFixture extends Fixture
             );
         }
 
-        /**
-         * TO DEBUG, UNCOMMENT THE FOLLOWING LINE :
-         * print_r($function->getShortName() . '_' . strval($object) . PHP_EOL);
-         */
+        // TO DEBUG, UNCOMMENT THE FOLLOWING LINE :
+        // print_r($function->getShortName() . '_' . strval($entity) . PHP_EOL);
 
         parent::addReference(
             $function->getShortName() . '_' . strval($entity),
