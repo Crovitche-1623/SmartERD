@@ -11,7 +11,7 @@ use Liip\TestFixturesBundle\Test\FixturesTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 /**
- * Make sure you have loaded the fixture before running the tests.
+ * Make sure you have created the database before running the tests.
  */
 final class JsonAuthenticatorTest extends ApiTestCase
 {
@@ -28,6 +28,18 @@ final class JsonAuthenticatorTest extends ApiTestCase
 
             $this->userFixturesHasBeenLoaded = true;
         }
+    }
+
+    public static function login(): string // return a JWT Token
+    {
+        $response = static::createClient()->request('POST', '/login', [
+            'json' => [
+                'username' => 'admin',
+                'password' => UserFixtures::DEFAULT_USER_PASSWORD
+            ]
+        ]);
+
+        return $response->toArray()['token'];
     }
 
     public function testPrivatePageIsInaccessible(): void
@@ -52,6 +64,7 @@ final class JsonAuthenticatorTest extends ApiTestCase
 
         $content = $response->toArray();
 
+        $this->assertResponseIsSuccessful();
         $this->assertArrayHasKey('token', $content);
         $this->assertResponseHasHeader('Content-Type', 'application/json');
     }
@@ -63,20 +76,14 @@ final class JsonAuthenticatorTest extends ApiTestCase
         self::bootKernel();
         $encoder = self::$container->get('lexik_jwt_authentication.encoder.lcobucci');
 
-        $response = static::createClient()->request('POST', '/login', [
-            'json' => [
-                'username' => 'admin',
-                'password' => UserFixtures::DEFAULT_USER_PASSWORD
-            ]
-        ]);
-
         $jwtIsValid = true;
         try {
-            $encoder->decode($response->toArray()['token']);
+            $encoder->decode($this->login());
         } catch (JWTDecodeFailureException $exception) {
             $jwtIsValid = false;
         }
 
+        $this->assertResponseIsSuccessful();
         $this->assertTrue($jwtIsValid);
     }
 }

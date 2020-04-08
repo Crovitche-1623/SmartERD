@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\{InputArgument, InputInterface};
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class UserCreateCommand extends Command
+final class UserCreateCommand extends Command
 {
     private Generator $faker;
     private EntityManagerInterface $em;

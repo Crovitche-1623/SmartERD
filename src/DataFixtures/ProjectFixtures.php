@@ -8,7 +8,8 @@ use App\Entity\{Project, User};
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-class ProjectFixtures extends BaseFixture implements DependentFixtureInterface
+final class ProjectFixtures extends BaseFixture implements
+    DependentFixtureInterface
 {
     public const PROJECTS_NUMBER = 20;
 
@@ -30,10 +31,11 @@ class ProjectFixtures extends BaseFixture implements DependentFixtureInterface
             self::PROJECTS_NUMBER,
             function (Project $project) {
 
-            /**
-             * That's not the ID ! It's the number used in fixture !
-             */
-            $userNumber = $this->faker->numberBetween(1, UserFixtures::USERS_NUMBER);
+            // That's not the ID ! It's the number used in fixture !
+            $userNumber = $this->faker->numberBetween(
+                1,
+                UserFixtures::USERS_NUMBER
+            );
 
             /**
              * @var  User  $creator
@@ -42,7 +44,8 @@ class ProjectFixtures extends BaseFixture implements DependentFixtureInterface
 
             $project
                 ->setTitle($this->faker->company)
-                ->setUser($creator);
+                ->setUser($creator)
+            ;
         });
 
         $manager->flush();

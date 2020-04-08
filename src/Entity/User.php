@@ -12,7 +12,6 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass = "App\Repository\UserRepository")
- *
  * To avoid the reserved SQL word "user", the table name is renamed
  * @ORM\Table(name = "member")
  *
@@ -25,15 +24,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class User implements UserInterface
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type = "integer")
-     *
-     * ID can be nullable because the id is only received after the data has
-     * been persisted.
-     */
-    private ?int $id = null;
+    use IdTrait;
 
     /**
      * @ORM\Column(length = 180, unique = true)
@@ -85,7 +76,7 @@ class User implements UserInterface
      *     mappedBy = "user",
      *     orphanRemoval = true
      * )
-     * @ApiSubresource()
+     * @ApiSubresource
      */
     private Collection $projects;
 
@@ -99,15 +90,10 @@ class User implements UserInterface
         return $this->username;
     }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-
     /**
      * A visual identifier that represents this user.
      *
-     * @see UserInterface
+     * @see  UserInterface
      */
     public function getUsername(): string
     {
@@ -219,7 +205,7 @@ class User implements UserInterface
     {
         if (!$this->projects->contains($project)) {
             $this->projects[] = $project;
-            $project->setCreatedBy($this);
+            $project->setUser($this);
         }
 
         return $this;
@@ -230,8 +216,8 @@ class User implements UserInterface
         if ($this->projects->contains($project)) {
             $this->projects->removeElement($project);
             // set the owning side to null (unless already changed)
-            if ($project->getCreatedBy() === $this) {
-                $project->setCreatedBy(null);
+            if ($project->getUser() === $this) {
+                $project->setUser(null);
             }
         }
 

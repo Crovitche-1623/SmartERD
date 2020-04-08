@@ -19,9 +19,10 @@ use Symfony\Component\Security\Core\User\{
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 /**
- * Cette classe s'occupe d'identifier l'utilisateur depuis la page de login (uniquement) via
- * son nom d'utilisateur / mot de passe.
- * Si les informations de connexions sont justes, un token JWT est retourné.
+ * This class is responsible for identifying the user from the login page only.
+ * The user must send his username and plain password in JSON format to
+ * the login page. If the credentials are correct, a JWT token is returned.
+ * Please note, the JWT token is returned from the SecurityController.php
  */
 class JsonAuthenticator extends AbstractGuardAuthenticator
 {
@@ -57,12 +58,12 @@ class JsonAuthenticator extends AbstractGuardAuthenticator
      */
     public function supports(Request $request): bool
     {
-        // On exige l'authentification si l'on est sur la page de login
-        // Dans le cas contraire, on demande à le token à chaque requête.
+        // We only ask for authentication if we're on the login page.
+        // Otherwise, we ask a token for each request.
         if ("login" === $request->attributes->get('_route') &&
             $request->isMethod('POST')) {
 
-            // Vérification des paramètres
+            // Parameters validation
             $credentials = json_decode($request->getContent(), true);
 
             if (!empty($credentials['username']) &&
@@ -125,7 +126,11 @@ class JsonAuthenticator extends AbstractGuardAuthenticator
         UserInterface $employee
     ): bool
     {
-        if (!$this->passwordEncoder->isPasswordValid($employee, $credentials['password'])) {
+        if (!$this->passwordEncoder->isPasswordValid(
+                $employee,
+                $credentials['password']
+            )
+        ) {
             throw new AuthenticationException('Le mot de passe est incorrect.');
         }
 
@@ -156,11 +161,12 @@ class JsonAuthenticator extends AbstractGuardAuthenticator
     public function onAuthenticationSuccess(
         Request $request,
         TokenInterface $token,
-        $providerKey
+        string $providerKey
     )
     {
-        // Le jeton est retourné depuis le contrôleur donc on ne s'en
-        // occupe pas ici. La requête poursuit en retournant null.
+        // The JWT is not returned from the SecurityController.php so we don't
+        // generate one here. The request continue by returning null in this
+        // method.
         return null;
     }
 

@@ -17,11 +17,11 @@ use Doctrine\ORM\Events;
  */
 class HashUserPasswordSubscriber implements EventSubscriber
 {
-    private UserPasswordEncoderInterface $userPasswordEncoder;
+    private UserPasswordEncoderInterface $passwordEncoder;
 
-    public function __construct(UserPasswordEncoderInterface $userPasswordEncoder)
+    public function __construct(UserPasswordEncoderInterface $passwordEncoder)
     {
-        $this->userPasswordEncoder = $userPasswordEncoder;
+        $this->passwordEncoder = $passwordEncoder;
     }
 
     /**
@@ -65,7 +65,7 @@ class HashUserPasswordSubscriber implements EventSubscriber
     private function encodePassword(User $user): void
     {
         if (null !== $user->getPlainPassword()) {
-            $user->setHashedPassword($this->userPasswordEncoder->encodePassword(
+            $user->setHashedPassword($this->passwordEncoder->encodePassword(
                 $user,
                 $user->getPlainPassword()
             ));

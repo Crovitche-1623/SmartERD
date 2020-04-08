@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Swagger;
 
-use App\DataFixtures\UserFixtures;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class SwaggerDecorator implements NormalizerInterface
+class CreateProjectDecorator implements NormalizerInterface
 {
     private NormalizerInterface $decorated;
 
@@ -36,54 +35,30 @@ class SwaggerDecorator implements NormalizerInterface
     {
         $docs = $this->decorated->normalize($object, $format, $context);
 
-        $docs['components']['schemas']['Token'] = [
-            'type' => 'object',
-            'properties' => [
-                'token' => [
-                    'type' => 'string',
-                    'readOnly' => true,
-                ],
-            ],
-        ];
-
-        $docs['components']['schemas']['Credentials'] = [
-            'type' => 'object',
-            'properties' => [
-                'username' => [
-                    'type' => 'string',
-                    'example' => 'admin',
-                ],
-                'password' => [
-                    'type' => 'string',
-                    'example' => UserFixtures::DEFAULT_USER_PASSWORD,
-                ],
-            ],
-        ];
-
-        $tokenDocumentation = [
+        $createProjectDocumentation = [
             'paths' => [
-                '/login' => [
+                '/projects' => [
                     'post' => [
-                        'tags' => ['Token'],
-                        'operationId' => 'postCredentialsItem',
-                        'summary' => 'Get JWT token to login.',
+                        'tags' => ['Project'],
+                        'operationId' => 'postProjectItem',
+                        'summary' => 'Create a Project resource.',
                         'requestBody' => [
-                            'description' => 'Create new JWT Token',
+                            'description' => 'Create a Project resource.',
                             'content' => [
                                 'application/json' => [
                                     'schema' => [
-                                        '$ref' => '#/components/schemas/Credentials',
+                                        '$ref' => '#/components/schemas/Project-project:create',
                                     ],
                                 ],
                             ],
                         ],
                         'responses' => [
-                            Response::HTTP_OK => [
-                                'description' => 'Get JWT token',
+                            Response::HTTP_CREATED => [
+                                'description' => 'The project has been created',
                                 'content' => [
                                     'application/json' => [
                                         'schema' => [
-                                            '$ref' => '#/components/schemas/Token',
+                                            '$ref' => '#/components/schemas/Project-project:read',
                                         ],
                                     ],
                                 ],
@@ -94,6 +69,6 @@ class SwaggerDecorator implements NormalizerInterface
             ],
         ];
 
-        return array_merge_recursive($docs, $tokenDocumentation);
+        return array_merge_recursive($docs, $createProjectDocumentation);
     }
 }

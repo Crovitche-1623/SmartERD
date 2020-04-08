@@ -35,7 +35,9 @@ final class SecurityController extends AbstractController
 
         // It's only null if firewall hasn't been configured.
         if (!$currentUser) {
-            $response = new JsonResponse(['erreur' => 'Authentification nécessaire']);
+            $response = new JsonResponse([
+                'erreur' => 'Authentification nécessaire'
+            ]);
             $response->setEncodingOptions(JSON_UNESCAPED_UNICODE);
             $response->setStatusCode(JsonResponse::HTTP_BAD_REQUEST);
             return $response;

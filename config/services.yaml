@@ -30,7 +30,17 @@ services:
         tags:
             - { name: doctrine.event_subscriber }
 
+    App\EventSubscriber\SetProjectOwnerSubscriber:
+        autowire: true
+        tags:
+            - { name: doctrine.event_subscriber }
+
     App\Swagger\SwaggerDecorator:
         decorates: 'api_platform.swagger.normalizer.documentation'
         arguments: ['@App\Swagger\SwaggerDecorator.inner']
+        autoconfigure: false
+
+    App\Swagger\CreateProjectDecorator:
+        decorates: 'api_platform.swagger.normalizer.documentation'
+        arguments: ['@App\Swagger\CreateProjectDecorator.inner']
         autoconfigure: false
