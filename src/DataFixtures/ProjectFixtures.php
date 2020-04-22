@@ -26,6 +26,17 @@ final class ProjectFixtures extends BaseFixture implements
      */
     public function loadData(ObjectManager $manager): void
     {
+        /**
+         * @var  User  $userAdmin
+         */
+        $userAdmin = $this->getReference('User_admin');
+
+        $manager->persist(
+            (new Project())
+                ->setTitle('A simple project for testing purpose')
+                ->setUser($userAdmin)
+        );
+
         $this->createMany(
             Project::class,
             self::PROJECTS_NUMBER,

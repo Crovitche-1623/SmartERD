@@ -62,7 +62,7 @@ abstract class BaseFixture extends Fixture
         $function = new ReflectionClass(get_class($entity));
 
         // Return an error if the entity class doesn't have an unique toString()
-        // method or getId()
+        // method
         if (!$function->hasMethod('__toString')) {
             throw new InvalidArgumentException(
                 sprintf(

@@ -39,15 +39,15 @@ use Doctrine\ORM\Mapping as ORM;
  *     },
  *     itemOperations = {
  *         "get" = {
- *             "security" = "user == object.user or is_granted('ROLE_ADMIN')",
+ *             "security" = "user == object.getUser() or is_granted('ROLE_ADMIN')",
  *             "security_message" = "You can only access project your projects data unless you're an admin."
  *         },
  *         "patch" = {
- *             "security" = "user == object.user or is_granted('ROLE_ADMIN')",
+ *             "security" = "user == object.getUser() or is_granted('ROLE_ADMIN')",
  *             "security_message" = "You can only update your projects unless you're an admin."
  *         },
  *         "delete" = {
- *             "security" = "user == object.user or is_granted('ROLE_ADMIN')",
+ *             "security" = "user == object.getUser() or is_granted('ROLE_ADMIN')",
  *             "security_message" = "You can only delete your projects unless you're an admin."
  *         }
  *     },

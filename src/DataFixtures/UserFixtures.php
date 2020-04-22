@@ -17,12 +17,22 @@ final class UserFixtures extends BaseFixture
      */
     public function loadData(ObjectManager $manager): void
     {
+        $admin = (new User())
+            ->setUsername('admin')
+            ->setEmail('admin@smarterd.io')
+            ->setPlainPassword(self::DEFAULT_USER_PASSWORD)
+            ->setIsAdmin(true)
+        ;
+
+        $manager->persist($admin);
+
+        $this->addSafeReference($admin);
+
         $manager->persist(
             (new User())
-                ->setUsername('admin')
-                ->setEmail('admin@smarterd.io')
+                ->setUsername('user')
+                ->setEmail('user@smarterd.io')
                 ->setPlainPassword(self::DEFAULT_USER_PASSWORD)
-                ->setIsAdmin(true)
         );
 
         $this->createMany(User::class, self::USERS_NUMBER, function (User $u) {

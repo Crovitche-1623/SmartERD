@@ -5,12 +5,13 @@ api_platform:
         json: ['application/merge-patch+json']
     swagger:
         versions: [3]
-
         # It create a button in top-right who allow the user to log in.
         api_keys:
             apiKey:
                 name: Authorization
                 type: header
+
+    enable_re_doc: false
 
     title: 'SmartERD API Documentation'
     description: 'An API for the Entity Relationship Diagram management'

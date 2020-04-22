@@ -164,7 +164,7 @@ class JsonAuthenticator extends AbstractGuardAuthenticator
         string $providerKey
     )
     {
-        // The JWT is not returned from the SecurityController.php so we don't
+        // The JWT is returned from the SecurityController.php so we don't
         // generate one here. The request continue by returning null in this
         // method.
         return null;

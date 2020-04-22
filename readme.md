@@ -1,4 +1,6 @@
 # SmartERD
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Crovitche-1623/SmartERD/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Crovitche-1623/SmartERD/?branch=master)
+
 SmartERD is a Symfony project designed to create Entity Relationship Diagrams. 
 These are used to have a model of the database while ignoring the RDBMS used.
 

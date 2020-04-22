@@ -63,6 +63,9 @@ class CreateProjectDecorator implements NormalizerInterface
                                     ],
                                 ],
                             ],
+                            Response::HTTP_BAD_REQUEST => [
+                                'description' => 'The project details are incorrect or the project already exist',
+                            ],
                         ],
                     ],
                 ],
