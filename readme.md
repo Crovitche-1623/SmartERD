@@ -43,7 +43,21 @@ These are used to have a model of the database while ignoring the RDBMS used.
  8. Open a browser and access the application with the given URL and enjoy !
  
 ## Tests
-Execute this command to run tests:
-```
-$   php bin/phpunit
-```
+Execute theses commands to run tests:
+A SQLite database is used for tests so we must configure it: 
+ 1. Delete the previous database if there is any:
+    ```
+    $   php bin/console d:d:d --if-exists --force --env=test
+    ```
+ 2. Create a new one:
+    ```
+    $   php bin/console d:d:c --env=test
+     ```
+ 3. Create the schema:
+    ```
+    $   php bin/console d:s:c --env=test
+    ```
+ 4. Run the tests:
+    ```
+    $   php bin/phpunit
+    ```

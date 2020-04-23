@@ -1,0 +1,5 @@
+doctrine:
+  dbal:
+    url: 'sqlite:///%kernel.project_dir%/var/smarterd.db'
+    driver: 'pdo_sqlite'
+    charset: utf8
