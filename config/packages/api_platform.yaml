@@ -3,6 +3,9 @@ api_platform:
         paths: ['%kernel.project_dir%/src/Entity']
     patch_formats:
         json: ['application/merge-patch+json']
+    error_formats:
+        jsonproblem:
+            mime_types: ['application/problem+json']
     swagger:
         versions: [3]
         # It create a button in top-right who allow the user to log in.

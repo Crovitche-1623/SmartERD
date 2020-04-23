@@ -79,7 +79,7 @@ final class CreateProjectController extends AbstractController
         // https://symfony.com/doc/master/reference/constraints/Sequentially.html
         if (count($errors) > 0) {
             return $this->json($errors, JsonResponse::HTTP_BAD_REQUEST, [
-                'Content-Type' => 'application/problem+json'
+                'content-type' => 'application/problem+json; charset=utf-8'
             ]);
         }
 

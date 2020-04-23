@@ -47,7 +47,7 @@ final class JsonAuthenticatorTest extends ApiTestCase
         ]);
 
         return static::createClient([], [
-            'auth_bearer' => $response->toArray()['token']
+            'auth_bearer' => $response->toArray()['token'],
         ]);
     }
 

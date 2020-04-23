@@ -116,6 +116,9 @@
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
+    "justinrainbow/json-schema": {
+        "version": "5.2.9"
+    },
     "laminas/laminas-code": {
         "version": "3.4.1"
     },
@@ -142,6 +145,9 @@
     },
     "liip/test-fixtures-bundle": {
         "version": "1.7.0"
+    },
+    "monolog/monolog": {
+        "version": "2.0.2"
     },
     "myclabs/deep-copy": {
         "version": "1.9.5"
@@ -387,6 +393,23 @@
     },
     "symfony/mime": {
         "version": "v5.0.5"
+    },
+    "symfony/monolog-bridge": {
+        "version": "v5.0.7"
+    },
+    "symfony/monolog-bundle": {
+        "version": "3.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "3.3",
+            "ref": "a89f4cd8a232563707418eea6c2da36acd36a917"
+        },
+        "files": [
+            "./config/packages/dev/monolog.yaml",
+            "./config/packages/prod/monolog.yaml",
+            "./config/packages/test/monolog.yaml"
+        ]
     },
     "symfony/orm-pack": {
         "version": "v1.0.8"

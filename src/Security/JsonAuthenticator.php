@@ -12,10 +12,7 @@ use Symfony\Component\Security\Core\Exception\{
     AuthenticationException,
     UsernameNotFoundException
 };
-use Symfony\Component\Security\Core\User\{
-    UserInterface,
-    UserProviderInterface
-};
+use Symfony\Component\Security\Core\User\{UserInterface, UserProviderInterface};
 use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 /**

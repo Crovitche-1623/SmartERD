@@ -4,11 +4,13 @@ declare(strict_types = 1);
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\{ApiResource, ApiSubresource};
+use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Controller\RetrieveUserProjects;
 
 /**
  * @ORM\Entity(repositoryClass = "App\Repository\UserRepository")
@@ -19,7 +21,14 @@ use Symfony\Component\Validator\Constraints as Assert;
  * other operation.
  * @ApiResource(
  *     collectionOperations = {},
- *     itemOperations = {}
+ *     itemOperations = {
+ *         "user_projects" = {
+ *             "method" = "GET",
+ *             "path" = "/users/{id}/projects",
+ *             "controller" = RetrieveUserProjects::class,
+ *             "normalization_context" = {"groups" = {"project:read"}}
+ *         }
+ *     }
  * )
  */
 class User implements UserInterface
@@ -76,7 +85,8 @@ class User implements UserInterface
      *     mappedBy = "user",
      *     orphanRemoval = true
      * )
-     * @ApiSubresource
+     *
+     * @Groups({"project:read"})
      */
     private Collection $projects;
 

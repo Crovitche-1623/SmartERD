@@ -21,7 +21,7 @@ final class SecurityController extends AbstractController
 
     /**
      * @Route(
-     *     "/login",
+     *     path = "/login",
      *     name = "login",
      *     methods = "POST"
      * )

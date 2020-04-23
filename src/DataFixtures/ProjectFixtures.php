@@ -12,6 +12,8 @@ final class ProjectFixtures extends BaseFixture implements
     DependentFixtureInterface
 {
     public const PROJECTS_NUMBER = 20;
+    public const ADMIN_PROJECT_NAME = 'A simple admin project for testing purpose';
+    public const USER_PROJECT_NAME = 'A simple user project for testing purpose';
 
     /**
      * {@inheritDoc}
@@ -27,15 +29,26 @@ final class ProjectFixtures extends BaseFixture implements
     public function loadData(ObjectManager $manager): void
     {
         /**
-         * @var  User  $userAdmin
+         * @var  User  $admin
          */
-        $userAdmin = $this->getReference('User_admin');
-
+        $admin = $this->getReference('User_admin');
         $manager->persist(
             (new Project())
-                ->setTitle('A simple project for testing purpose')
-                ->setUser($userAdmin)
+                ->setTitle(self::ADMIN_PROJECT_NAME)
+                ->setUser($admin)
         );
+        unset($admin);
+
+        /**
+         * @var  User  $user
+         */
+        $user = $this->getReference('User_user');
+        $manager->persist(
+            (new Project())
+                ->setTitle(self::USER_PROJECT_NAME)
+                ->setUser($user)
+        );
+        unset($user);
 
         $this->createMany(
             Project::class,
@@ -52,6 +65,7 @@ final class ProjectFixtures extends BaseFixture implements
              * @var  User  $creator
              */
             $creator = $this->getReference('App\\Entity\\User_' . $userNumber);
+            unset($userNumber);
 
             $project
                 ->setTitle($this->faker->company)

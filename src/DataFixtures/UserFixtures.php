@@ -23,17 +23,18 @@ final class UserFixtures extends BaseFixture
             ->setPlainPassword(self::DEFAULT_USER_PASSWORD)
             ->setIsAdmin(true)
         ;
-
         $manager->persist($admin);
-
         $this->addSafeReference($admin);
+        unset($admin);
 
-        $manager->persist(
-            (new User())
-                ->setUsername('user')
-                ->setEmail('user@smarterd.io')
-                ->setPlainPassword(self::DEFAULT_USER_PASSWORD)
-        );
+        $user = (new User())
+            ->setUsername('user')
+            ->setEmail('user@smarterd.io')
+            ->setPlainPassword(self::DEFAULT_USER_PASSWORD)
+        ;
+        $manager->persist($user);
+        $this->addSafeReference($user);
+        unset($user);
 
         $this->createMany(User::class, self::USERS_NUMBER, function (User $u) {
             $u

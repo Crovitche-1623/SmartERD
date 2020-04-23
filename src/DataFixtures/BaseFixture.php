@@ -23,6 +23,12 @@ abstract class BaseFixture extends Fixture
         $this->loadData($manager);
     }
 
+    /**
+     * This method is called by the mandatory "load" method but the load method
+     * include faker before.
+     *
+     * @param  ObjectManager  $manager
+     */
     abstract protected function loadData(ObjectManager $manager): void;
 
     protected function createMany(

@@ -28,19 +28,16 @@ use Doctrine\ORM\Mapping as ORM;
  *     message = "You have already created a project with this name {{ value }}",
  * )
  *
+ * TODO: Créez un endpoint personnalisé pour gérer la sécurité avec la
+ *       sous-ressource. La config ci-dessous ne fonctionne pas.
+ *
  * @ApiResource(
  *     iri = "https://schema.org/Project",
  *     collectionOperations = {},
- *     subresourceOperations = {
- *         "api_users_created_projects_get_subresource" = {
- *             "method" = "GET",
- *             "normalization_context" = {"groups" = {"project:read"}}
- *         }
- *     },
  *     itemOperations = {
  *         "get" = {
  *             "security" = "user == object.getUser() or is_granted('ROLE_ADMIN')",
- *             "security_message" = "You can only access project your projects data unless you're an admin."
+ *             "security_message" = "You can only access your projects data unless you're an admin."
  *         },
  *         "patch" = {
  *             "security" = "user == object.getUser() or is_granted('ROLE_ADMIN')",
@@ -68,7 +65,7 @@ class Project
      *
      * @ApiProperty(iri = "https://schema.org/title")
      *
-     * @Groups({"project:create", "project:read", "user:read"})
+     * @Groups({"project:create", "project:read"})
      */
     private string $title = '';
 
