@@ -118,32 +118,12 @@ final class ProjectsTest extends ApiTestCase
         $user = $this->em->getRepository(User::class)
             ->findOneBy(['username' => 'user']);
 
-        // /**
-        //  * @var  integer  $userProjectsCount
-        //  */
-        // $userProjectsCount = $this->em->createQuery('
-        //    SELECT
-        //        COUNT(p0.id)
-        //    FROM
-        //        App\Entity\Project p0
-        //        JOIN p0.user u1
-        //    WHERE
-        //        u1.id = :id
-        //    ')
-        //    ->setParameter('id', (int) $user->getId())
-        //    ->getSingleScalarResult();
-        //
-        // $lastPage = floor((int) $userProjectsCount / ProjectRepository::PROJECTS_PER_PAGE);
-        // $lastPage === 0 ? $lastPage = 1 : $lastPage = 0;
-        // unset($userProjectsCount);
-
         $this->assertJsonContains([
             '@context' => '/contexts/Project',
             '@id' => '/projects',
             '@type' => 'hydra:Collection',
             'hydra:totalItems' => ProjectFixtures::TOTAL_PROJECTS_NUMBER
         ]);
-        //unset($lastPage);
 
         // Because test fixtures are automatically loaded between each test, you can assert on them
         // this assert check that "item per page" is well configured for project resource.
