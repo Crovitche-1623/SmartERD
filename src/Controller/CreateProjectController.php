@@ -32,6 +32,11 @@ final class CreateProjectController extends AbstractController
     }
 
     /**
+     * TODO: Replace this file by using built-in POST method in API Platform.
+     *       The previous purpose of this file was to check if the project owner
+     *       & the current user are the same. An additional purpose was to
+     *       return application/problem+json content-type.
+     *
      * @Route(
      *     path = "/projects",
      *     name = "api_projects_post_collection",

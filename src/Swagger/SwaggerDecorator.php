@@ -8,7 +8,7 @@ use App\DataFixtures\UserFixtures;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class SwaggerDecorator implements NormalizerInterface
+final class SwaggerDecorator implements NormalizerInterface
 {
     private NormalizerInterface $decorated;
 

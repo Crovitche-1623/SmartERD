@@ -38,7 +38,7 @@ abstract class BaseFixture extends Fixture
     ): void
     {
         for ($i = 1; $i <= $count; $i++) {
-            $entity = new $className();
+            $entity = new $className;
             $factory($entity, $i);
             $this->manager->persist($entity);
 
@@ -48,20 +48,18 @@ abstract class BaseFixture extends Fixture
     }
 
     /**
-     * TODO: Traduire en anglais
-     *
-     * Afin d'avoir des références uniques et éviter des collisions, chaque référence est préfixé par le nom de la
-     * classe qu'il possède. Pour s'assurer qu'il y aura jamais aucune collisions, la méthode "__toString()" doit
-     * obligatoirement retourné quelque chose d'unique (ce qui caractérise la donnée).
-     * Le but de cette fonction est d'ensuite pouvoir récupérer des références simplement en donnant simplement la
-     * donnée qui les définit.
+     * To have unique reference and to avoid collisions, each reference is
+     * prefixed by the name of his class. To be sure there will be no
+     * collisions, the "__toString()" method MUST return something unique (which
+     * identify the data). The goal of ths function is to get reference by
+     * giving a simple unique which identify the data.
      *
      * @param  object  $entity
-     * @throws  InvalidArgumentException  Dans le cas où l'entité
-     *                                    n'implémenterait pas la méthode
-     *                                    "__toString()".
-     * @throws  ReflectionException  Dans le cas où un mauvais paramètre serait envoyé à la
-     *                               la ReflectionClass
+     * @throws  InvalidArgumentException  In the case where entity would not
+     *                                    have implemented the "__toString()"
+     *                                    method.
+     * @throws  ReflectionException  In the case where a bad parameter would be
+     *                               sent to the ReflectionClass
      */
     public function addSafeReference(object $entity): void
     {

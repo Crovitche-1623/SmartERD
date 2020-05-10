@@ -12,10 +12,10 @@ use Doctrine\ORM\Events;
 
 /**
  * This subscriber is responsible of encoding the password in the case where
- * user->getPlainPassword isn't null. After the password has been encoded, the
+ * user->getPlainPassword() isn't null. After the password has been encoded, the
  * method $user->eraseCredentials() is called and the plainPassword is removed.
  */
-class HashUserPasswordSubscriber implements EventSubscriber
+final class HashUserPasswordSubscriber implements EventSubscriber
 {
     private UserPasswordEncoderInterface $passwordEncoder;
 

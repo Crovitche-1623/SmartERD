@@ -2,3 +2,7 @@ api_platform:
     resource: .
     type: api_platform
     # prefix: /api
+
+# custom operation MUST be declared after this line !
+# @see https://github.com/api-platform/api-platform/issues/521#issuecomment-358877746
+

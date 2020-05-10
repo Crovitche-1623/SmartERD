@@ -5,14 +5,16 @@ declare(strict_types = 1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\{ApiResource, ApiProperty};
+use App\Repository\ProjectRepository;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User;
 
 /**
- * @ORM\Entity(repositoryClass = "App\Repository\ProjectRepository")
+ * @ORM\Entity(repositoryClass = ProjectRepository::class)
  * @ORM\Table(
  *     uniqueConstraints = {
  *         @ORM\UniqueConstraint(
@@ -22,18 +24,24 @@ use Doctrine\ORM\Mapping as ORM;
  *     }
  * )
  *
+ * @Assert\EnableAutoMapping
+ *
  * @UniqueEntity(
  *     fields = {"user", "title"},
  *     errorPath = "title",
  *     message = "You have already created a project with this name {{ value }}",
  * )
  *
- * TODO: Créez un endpoint personnalisé pour gérer la sécurité avec la
- *       sous-ressource. La config ci-dessous ne fonctionne pas.
- *
+ * N.B: All the "security" annotation below is an additional security because
+ *      an additional "where" close is added foreach DQL query.
  * @ApiResource(
+ *     attributes = {
+ *         "pagination_items_per_page" = ProjectRepository::ITEM_PER_PAGE
+ *     },
  *     iri = "https://schema.org/Project",
- *     collectionOperations = {},
+ *     collectionOperations = {
+ *         "get"
+ *     },
  *     itemOperations = {
  *         "get" = {
  *             "security" = "user == object.getUser() or is_granted('ROLE_ADMIN')",
@@ -59,10 +67,6 @@ class Project
     /**
      * @ORM\Column(length = 50)
      *
-     * @Assert\NotBlank
-     * @Assert\Type("string")
-     * @Assert\Length(min = 1, max = 50)
-     *
      * @ApiProperty(iri = "https://schema.org/title")
      *
      * @Groups({"project:create", "project:read"})
@@ -71,7 +75,7 @@ class Project
 
     /**
      * @ORM\ManyToOne(
-     *     targetEntity = "App\Entity\User",
+     *     targetEntity = User::class,
      *     inversedBy = "projects"
      * )
      * @ORM\JoinColumn(nullable = false)

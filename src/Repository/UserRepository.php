@@ -20,7 +20,7 @@ use Symfony\Component\Security\Core\User\{
  * @method  User[]  findAll()
  * @method  User[]  findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+final class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -50,6 +50,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         }
         $user->setHashedPassword($newEncodedPassword);
         $this->_em->persist($user);
+        unset($user);
         $this->_em->flush();
     }
 }

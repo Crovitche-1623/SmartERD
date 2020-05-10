@@ -44,3 +44,15 @@ services:
         decorates: 'api_platform.swagger.normalizer.documentation'
         arguments: ['@App\Swagger\CreateProjectDecorator.inner']
         autoconfigure: false
+
+    App\Swagger\CurrentUserDecorator:
+        decorates: 'api_platform.swagger.normalizer.documentation'
+        arguments: ['@App\Swagger\CurrentUserDecorator.inner']
+        autoconfigure: false
+
+    'App\Doctrine\CurrentUserExtension':
+        tags:
+            - { name: api_platform.doctrine.orm.query_extension.collection }
+            - { name: api_platform.doctrine.orm.query_extension.item }
+
+

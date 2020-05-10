@@ -7,7 +7,7 @@ namespace App\Swagger;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class CreateProjectDecorator implements NormalizerInterface
+final class CreateProjectDecorator implements NormalizerInterface
 {
     private NormalizerInterface $decorated;
 
@@ -31,7 +31,7 @@ class CreateProjectDecorator implements NormalizerInterface
         $object,
         string $format = null,
         array $context = []
-    )
+    ): array
     {
         $docs = $this->decorated->normalize($object, $format, $context);
 

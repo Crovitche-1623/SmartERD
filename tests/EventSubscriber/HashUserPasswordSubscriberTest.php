@@ -9,7 +9,7 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-class HashUserPasswordSubscriberTest extends KernelTestCase
+final class HashUserPasswordSubscriberTest extends KernelTestCase
 {
     private EntityManagerInterface $em;
 

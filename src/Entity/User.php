@@ -4,32 +4,16 @@ declare(strict_types = 1);
 
 namespace App\Entity;
 
-use ApiPlatform\Core\Annotation\ApiResource;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Controller\RetrieveUserProjects;
+use App\Entity\Project;
 
 /**
- * @ORM\Entity(repositoryClass = "App\Repository\UserRepository")
- * To avoid the reserved SQL word "user", the table name is renamed
- * @ORM\Table(name = "member")
- *
- * The ApiResource is required for the ApiSubResource. Even if we don't have
- * other operation.
- * @ApiResource(
- *     collectionOperations = {},
- *     itemOperations = {
- *         "user_projects" = {
- *             "method" = "GET",
- *             "path" = "/users/{id}/projects",
- *             "controller" = RetrieveUserProjects::class,
- *             "normalization_context" = {"groups" = {"project:read"}}
- *         }
- *     }
- * )
+ * @ORM\Entity(repositoryClass = UserRepository::class)
+ * @ORM\Table(name = "member") To avoid the reserved SQL word "user"
  */
 class User implements UserInterface
 {
@@ -81,12 +65,10 @@ class User implements UserInterface
 
     /**
      * @ORM\OneToMany(
-     *     targetEntity = "App\Entity\Project",
+     *     targetEntity = Project::class,
      *     mappedBy = "user",
      *     orphanRemoval = true
      * )
-     *
-     * @Groups({"project:read"})
      */
     private Collection $projects;
 

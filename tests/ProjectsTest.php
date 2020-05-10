@@ -6,6 +6,8 @@ namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\ProjectFixtures;
+use App\Repository\ProjectRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\{Project, User};
 use App\Tests\Security\JsonAuthenticatorTest;
 use Liip\TestFixturesBundle\Test\FixturesTrait;
@@ -17,6 +19,7 @@ final class ProjectsTest extends ApiTestCase
     use FixturesTrait;
 
     private HttpClientInterface $client;
+    private EntityManagerInterface $em;
     private bool $fixturesHaveBeenLoaded = false;
 
     /**
@@ -24,16 +27,22 @@ final class ProjectsTest extends ApiTestCase
      */
     protected function setUp(): void
     {
+        $kernel = self::bootKernel();
+        $this->em = $kernel->getContainer()->get('doctrine')->getManager();
         $this->client = JsonAuthenticatorTest::login();
 
         if (!$this->fixturesHaveBeenLoaded) {
-            $this->loadFixtures([ProjectFixtures::class]);
+            $this->loadFixtures([
+                // Because ProjectFixtures need UserFixtures, UserFixtures are
+                // automatically loaded.
+                ProjectFixtures::class
+            ]);
 
             $this->fixturesHaveBeenLoaded = true;
         }
     }
 
-    public function testCreateProject(): void
+    public function testCreate(): void
     {
         $title = 'Test Project';
 
@@ -58,7 +67,7 @@ final class ProjectsTest extends ApiTestCase
      * Same user could not create the same project. A Project is identified by
      * his author and his title
      */
-    public function testCreateSameProject(): void
+    public function testCreateSame(): void
     {
         $sameTitle = 'This title is going to be inserted two times !';
 
@@ -78,7 +87,7 @@ final class ProjectsTest extends ApiTestCase
         ]);
     }
 
-    public function testCreateProjectWithTooLongTitle(): void
+    public function testCreateWithTooLongTitle(): void
     {
         $tooLongTitle = '';
         for ($i = 0; $i < 100; $i++) {
@@ -97,7 +106,103 @@ final class ProjectsTest extends ApiTestCase
         ]);
     }
 
-    public function testOtherUserProjectsAreNotAvailableAsUser(): void
+    public function testUserCanAccessHisProjects(): void
+    {
+        $this->client = JsonAuthenticatorTest::login();
+
+        $response = $this->client->request('GET', '/projects');
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseHeaderSame('Content-Type', 'application/ld+json; charset=utf-8');
+
+        $user = $this->em->getRepository(User::class)
+            ->findOneBy(['username' => 'user']);
+
+        // /**
+        //  * @var  integer  $userProjectsCount
+        //  */
+        // $userProjectsCount = $this->em->createQuery('
+        //    SELECT
+        //        COUNT(p0.id)
+        //    FROM
+        //        App\Entity\Project p0
+        //        JOIN p0.user u1
+        //    WHERE
+        //        u1.id = :id
+        //    ')
+        //    ->setParameter('id', (int) $user->getId())
+        //    ->getSingleScalarResult();
+        //
+        // $lastPage = floor((int) $userProjectsCount / ProjectRepository::PROJECTS_PER_PAGE);
+        // $lastPage === 0 ? $lastPage = 1 : $lastPage = 0;
+        // unset($userProjectsCount);
+
+        $this->assertJsonContains([
+            '@context' => '/contexts/Project',
+            '@id' => '/projects',
+            '@type' => 'hydra:Collection',
+            'hydra:totalItems' => ProjectFixtures::TOTAL_PROJECTS_NUMBER
+        ]);
+        //unset($lastPage);
+
+        // Because test fixtures are automatically loaded between each test, you can assert on them
+        // this assert check that "item per page" is well configured for project resource.
+        $this->assertCount(
+            ProjectRepository::ITEM_PER_PAGE,
+            $response->toArray()['hydra:member']
+        );
+
+        // Asserts that the returned JSON is validated by the JSON Schema generated for this resource by API Platform
+        // This generated JSON Schema is also used in the OpenAPI spec!
+        $this->assertMatchesResourceCollectionJsonSchema(Project::class);
+    }
+
+    public function testAdminCanAccessAllProjects(): void
+    {
+        $this->client = JsonAuthenticatorTest::login();
+
+        $this->client->request('GET', '/projects');
+
+        $projectsCountDQL = <<<DQL
+            SELECT
+                COUNT(p.id)
+            FROM
+                App\Entity\Project p
+        DQL;
+
+        /**
+         * @var  integer  $projectsCount
+         */
+        $projectsCount = $this->em
+            ->createQuery($projectsCountDQL)
+            ->getSingleScalarResult();
+
+        $lastPage = ceil((int) $projectsCount / ProjectRepository::ITEM_PER_PAGE);
+
+        $this->assertResponseIsSuccessful();
+        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+        $this->assertJsonContains([
+            '@context' => '/contexts/Project',
+            "@id" => "/projects",
+            "@type" => "hydra:Collection",
+            "hydra:totalItems" => intval($projectsCount),
+            "hydra:view" => [
+                "@id" => "/projects?page=1",
+                "@type" => "hydra:PartialCollectionView",
+                "hydra:first" => "/projects?page=1",
+                "hydra:last" => "/projects?page=" . (int) $lastPage,
+                "hydra:next" => "/projects?page=2"
+            ]
+        ]);
+        $this->assertMatchesResourceCollectionJsonSchema(Project::class);
+    }
+
+    /**
+     * @example User 1 has the projects 3,4,5 & the user 2 the projects 6,7,8:
+     *          If the user 1 request /projects/6 it should return a 404
+     *          response.
+     */
+    public function testOtherUserProjectAreNotAvailableAsUser(): void
     {
         // 1. Login as an user to try to access administrator projects
         //    The following tests will be done
@@ -105,20 +210,12 @@ final class ProjectsTest extends ApiTestCase
         //     - Errors are correctly formatted.
         $this->client = JsonAuthenticatorTest::login(false);
 
-        $kernel = self::bootKernel();
-
-        $em = $kernel
-            ->getContainer()
-            ->get('doctrine')
-            ->getManager();
-
-
         /**
          * We have to retrieve the admin entity to find the project iri.
          *
          * @var  User  $admin
          */
-        $admin = $em->getRepository(User::class)
+        $admin = $this->em->getRepository(User::class)
             ->findOneBy(['username' => 'admin']);
 
         // findIriBy allows to retrieve the IRI of an item by searching for some
@@ -137,14 +234,15 @@ final class ProjectsTest extends ApiTestCase
         //  - "composer require symfony/monolog-bundle" otherwise
         // otherwise log will appear directly in terminal.
 
-        // We are asking for a admin project so it must return a 403 response
+        // We are asking for a admin project so it must return a 404 response
+        // not a 403 because otherwise an other user can see the id is valid.
         $this->client->request('GET', $url);
 
-        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_FORBIDDEN);
+        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
         $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
     }
 
-    public function testOtherUserProjectsAreAvailableAsAdmin(): void
+    public function testUserProjectsAreAvailableAsAdmin(): void
     {
         // 1. Login as an admin to try to access user projects
         //    The following tests will be done
@@ -152,19 +250,12 @@ final class ProjectsTest extends ApiTestCase
         //     - response is correctly formatted
         $this->client = JsonAuthenticatorTest::login(true);
 
-        $kernel = self::bootKernel();
-
-        $em = $kernel
-            ->getContainer()
-            ->get('doctrine')
-            ->getManager();
-
         /**
          * We have to retrieve the user entity to find the project iri.
          *
          * @var  User  $user
          */
-        $user = $em->getRepository(User::class)
+        $user = $this->em->getRepository(User::class)
             ->findOneBy(['username' => 'user']);
 
         // findIriBy allows to retrieve the IRI of an item by searching for some
@@ -187,5 +278,17 @@ final class ProjectsTest extends ApiTestCase
         ]);
         $this->assertRegExp('~^/projects/\d+$~', $response->toArray()['@id']);
         $this->assertMatchesResourceItemJsonSchema(Project::class);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        // doing this is recommended to avoid memory leaks
+        $this->em->close();
+        unset($this->em);
     }
 }

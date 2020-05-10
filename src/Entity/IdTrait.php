@@ -7,8 +7,8 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Generate a simple auto incremented integer column which is part of primary
- * key. This trait is useful to save some line of recurring code.
+ * Generate a simple auto incremented integer column which is (or part of) the
+ * primary key. This trait is useful to save some line of recurring code.
  */
 trait IdTrait
 {

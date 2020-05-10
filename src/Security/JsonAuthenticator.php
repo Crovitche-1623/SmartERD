@@ -21,7 +21,7 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
  * the login page. If the credentials are correct, a JWT token is returned.
  * Please note, the JWT token is returned from the SecurityController.php
  */
-class JsonAuthenticator extends AbstractGuardAuthenticator
+final class JsonAuthenticator extends AbstractGuardAuthenticator
 {
     private UserRepository $userRepository;
     private UserPasswordEncoderInterface $passwordEncoder;
