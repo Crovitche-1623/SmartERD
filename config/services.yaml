@@ -50,9 +50,14 @@ services:
         arguments: ['@App\Swagger\CurrentUserDecorator.inner']
         autoconfigure: false
 
-    'App\Doctrine\CurrentUserExtension':
+    App\Doctrine\CurrentUserExtension:
         tags:
             - { name: api_platform.doctrine.orm.query_extension.collection }
             - { name: api_platform.doctrine.orm.query_extension.item }
+
+    App\Doctrine\EntitiesBelongingToProjectOfCurrentUserExtension:
+        tags:
+            - { name: api_platform.doctrine.orm.query_extension.item }
+
 
 

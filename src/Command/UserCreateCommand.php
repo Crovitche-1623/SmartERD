@@ -90,7 +90,7 @@ final class UserCreateCommand extends Command
         if ($ok) {
             try {
                 $this->em->persist(
-                    (new User())
+                    (new User)
                         ->setUsername($username)
                         ->setEmail($email)
                         ->setIsAdmin($isAdmin)

@@ -14,16 +14,30 @@ trait IdTrait
 {
     /**
      * @ORM\Id
-     * @ORM\GeneratedValue
      * @ORM\Column(type = "integer")
+     * @ORM\GeneratedValue
      *
      * ID can be nullable because the id is only received after the data has
      * been persisted.
      */
     protected ?int $id = null;
 
+    /**
+     * This method won't be available if you use the database less provider
+     * for JWT.
+     */
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    /*
+     * Warning: This method should be only used to define ID from JWT Payload.
+     */
+    public function setId(?int $id): self
+    {
+        $this->id = $id;
+
+        return $this;
     }
 }

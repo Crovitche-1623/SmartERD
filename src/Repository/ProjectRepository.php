@@ -9,6 +9,7 @@ use App\Entity\Project;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * @method  Project|null  find($id, $lockMode = null, $lockVersion = null)
@@ -23,6 +24,26 @@ final class ProjectRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Project::class);
+    }
+
+    public function findOneByUserAndName(
+        UserInterface $user,
+        string $projectName
+    ): Project
+    {
+        return $this->_em->createQuery('
+            SELECT
+                p0
+            FROM
+                App\Entity\Project p0
+                JOIN p0.user u1
+            WHERE 
+                u1.username = :username AND
+                p0.name = :projectName
+        ')
+        ->setParameter('username', $user->getUsername())
+        ->setParameter('projectName', $projectName)
+        ->getOneOrNullResult();
     }
 
     /**

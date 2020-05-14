@@ -23,6 +23,8 @@ final class HashUserPasswordSubscriberTest extends KernelTestCase
         $this->em = $kernel->getContainer()
             ->get('doctrine')
             ->getManager();
+
+        parent::setUp();
     }
 
     public function testPrePersist(): void
@@ -56,7 +58,7 @@ final class HashUserPasswordSubscriberTest extends KernelTestCase
         // 2.1 Set the hashed password to a blank string for the test
         $obtainedUser = $this->em
             ->getRepository(User::class)
-            ->find($user->getId());
+            ->findOneBy(['username' => $user->getUsername()]);
         unset($user);
 
         $obtainedUser->setHashedPassword('');

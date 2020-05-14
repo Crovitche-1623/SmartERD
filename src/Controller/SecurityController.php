@@ -20,14 +20,10 @@ final class SecurityController extends AbstractController
     }
 
     /**
-     * @Route(
-     *     path = "/login",
-     *     name = "login",
-     *     methods = "POST"
-     * )
+     * @Route(path = "/login", name = "login", methods = "POST")
      *
      * @return  JsonResponse
-     * @throws  JWTEncodeFailureException if the JWT cannot be encoded
+     * @throws  JWTEncodeFailureException  if the JWT cannot be encoded
      */
     public function login(): JsonResponse
     {
@@ -38,13 +34,16 @@ final class SecurityController extends AbstractController
             $response = new JsonResponse([
                 'erreur' => 'Authentification nécessaire'
             ]);
-            $response->setEncodingOptions(JSON_UNESCAPED_UNICODE);
-            $response->setStatusCode(JsonResponse::HTTP_BAD_REQUEST);
-            return $response;
+            return $response
+                ->setEncodingOptions(JSON_UNESCAPED_UNICODE)
+                ->setStatusCode(JsonResponse::HTTP_BAD_REQUEST)
+            ;
         }
 
         $token = $this->jwtEncoder->encode([
+            'sub' => $currentUser->getId(),
             'username' => $currentUser->getUsername(),
+            'roles' => $currentUser->getRoles(),
             'exp' => time() + 1800 // 30 minutes expiration
         ]);
 

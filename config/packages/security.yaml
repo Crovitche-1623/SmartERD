@@ -1,6 +1,6 @@
 security:
     role_hierarchy:
-        ROLE_ADMIN: ROLE_EMPLOYEE
+        ROLE_ADMIN: ROLE_USER
 
     encoders:
         App\Entity\User:
@@ -8,6 +8,10 @@ security:
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
+        jwt:
+            lexik_jwt:
+                class: App\Entity\User
+
         # used to reload user from session & other features (e.g. switch_user)
         app_user_provider:
             entity:
@@ -20,7 +24,7 @@ security:
         main:
             stateless: true
             anonymous: true
-            provider: app_user_provider
+            provider: jwt
             guard:
                 authenticators:
                     - App\Security\JsonAuthenticator
@@ -38,4 +42,5 @@ security:
     access_control:
         - { path: ^/docs, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Allows accessing the Swagger UI
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/test, roles: IS_AUTHENTICATED_ANONYMOUSLY } # TODO: Remove it in production
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

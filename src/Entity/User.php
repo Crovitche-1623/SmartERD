@@ -7,32 +7,28 @@ namespace App\Entity;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
+use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
-use App\Entity\Project;
 
 /**
  * @ORM\Entity(repositoryClass = UserRepository::class)
  * @ORM\Table(name = "member") To avoid the reserved SQL word "user"
+ * @Assert\EnableAutoMapping
  */
-class User implements UserInterface
+class User implements UserInterface, JWTUserInterface, UniqueStringableInterface
 {
     use IdTrait;
 
     /**
      * @ORM\Column(length = 180, unique = true)
      *
-     * @Assert\NotBlank
-     * @Assert\Type("string")
-     * @Assert\Length(min = 3, max = 180)
+     * @Assert\Length(min = 3)
      */
     private string $username = '';
 
     /**
      * @ORM\Column(type = "boolean")
-     *
-     * @Assert\NotNull
-     * @Assert\Type("bool")
      */
     private bool $isAdmin = false;
 
@@ -57,11 +53,9 @@ class User implements UserInterface
     /**
      * @ORM\Column(length = 180, unique = true)
      *
-     * @Assert\NotBlank
-     * @Assert\Type("string")
      * @Assert\Email
      */
-    private string $email = '';
+    private ?string $email = null;
 
     /**
      * @ORM\OneToMany(
@@ -74,12 +68,21 @@ class User implements UserInterface
 
     public function __construct()
     {
-        $this->projects = new ArrayCollection();
+        $this->projects = new ArrayCollection;
     }
 
     public function __toString(): string
     {
         return $this->username;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function toUniqueString(): string
+    {
+        // Because this method is the identifier for UserInterface.
+        return $this->getUsername();
     }
 
     /**
@@ -114,6 +117,18 @@ class User implements UserInterface
         $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
+    }
+
+    /**
+     * @param  array<string>  $roles
+     */
+    public function setRoles(array $roles): self
+    {
+        if (in_array('ROLE_ADMIN', $roles)) {
+            $this->setIsAdmin(true);
+        }
+
+        return $this;
     }
 
     public function getIsAdmin(): bool
@@ -173,12 +188,12 @@ class User implements UserInterface
         $this->plainPassword = null;
     }
 
-    public function getEmail(): string
+    public function getEmail(): ?string
     {
         return $this->email;
     }
 
-    public function setEmail(string $email): self
+    public function setEmail(?string $email): self
     {
         $this->email = $email;
 
@@ -214,5 +229,20 @@ class User implements UserInterface
         }
 
         return $this;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * Create a new instance of this entity from the JWT Payload. Because the
+     * payload of JWT cannot contain sensitive information. Method like
+     * getHashedPassword WILL ALWAYS return null.
+     */
+    public static function createFromPayload($username, array $payload): self
+    {
+        return (new self)
+            ->setUsername($username)
+            ->setRoles($payload['roles'])
+            ->setId($payload['sub']);
     }
 }

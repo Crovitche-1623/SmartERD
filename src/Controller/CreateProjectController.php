@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Project;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpClient\Exception\InvalidArgumentException;
@@ -19,16 +20,19 @@ final class CreateProjectController extends AbstractController
     private ValidatorInterface $validator;
     private SerializerInterface $serializer;
     private EntityManagerInterface $em;
+    private UserRepository $userRepository;
 
     public function __construct(
         ValidatorInterface $validator,
         SerializerInterface $serializer,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        UserRepository $userRepository
     )
     {
         $this->validator = $validator;
         $this->serializer = $serializer;
         $this->em = $em;
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -42,6 +46,9 @@ final class CreateProjectController extends AbstractController
      *     name = "api_projects_post_collection",
      *     methods = "POST"
      * )
+     * @param  Request  $request
+     *
+     * @return  JsonResponse
      */
     public function __invoke(Request $request): JsonResponse
     {
@@ -56,9 +63,13 @@ final class CreateProjectController extends AbstractController
             );
         }
 
-        $currentUser = $this->getUser();
+        /**
+         * Because the entity is recreated using JWT Payload, it is not the
+         * "real" user yet. It will be retrieved afterwards.
+         */
+        $userPayload = $this->getUser();
 
-        if (null === $currentUser) {
+        if (null === $userPayload) {
             throw new AuthenticationException(
                 'Authentication required',
                 JsonResponse::HTTP_UNAUTHORIZED
@@ -74,6 +85,7 @@ final class CreateProjectController extends AbstractController
             'json'
         );
 
+        $currentUser = $this->userRepository->find($userPayload->getId());
         $project->setUser($currentUser);
 
         $errors = $this->validator->validate($project);

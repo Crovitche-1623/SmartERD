@@ -21,27 +21,28 @@ final class JsonAuthenticatorTest extends ApiTestCase
     private bool $userFixturesHaveBeenLoaded = false;
     private HttpClientInterface $client;
 
+    /**
+     * {@inheritDoc}
+     */
     public function setUp(): void
     {
         $this->loadUserFixturesIfNotAlreadyDone();
+        parent::setUp();
     }
 
     private function loadUserFixturesIfNotAlreadyDone(): void
     {
         if (!$this->userFixturesHaveBeenLoaded) {
-            $this->loadFixtures([
-                UserFixtures::class
-            ]);
-
+            $this->loadFixtures([UserFixtures::class]);
             $this->userFixturesHaveBeenLoaded = true;
         }
     }
 
-    public static function login(bool $loginAsAdmin = true): HttpClientInterface
+    public static function login(bool $asAdmin = true): HttpClientInterface
     {
         $response = static::createClient()->request('POST', '/login', [
             'json' => [
-                'username' => $loginAsAdmin ? 'admin' : 'user',
+                'username' => $asAdmin ? 'admin' : 'user',
                 'password' => UserFixtures::DEFAULT_USER_PASSWORD
             ]
         ]);

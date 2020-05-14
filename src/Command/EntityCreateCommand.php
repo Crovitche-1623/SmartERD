@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace App\Command;
 
-use App\DataFixtures\UserFixtures;
-use App\Entity\{Project, User};
+use App\DataFixtures\{ProjectFixtures, UserFixtures};
+use App\Entity\{Entity, Project, User};
 use Doctrine\ORM\EntityManagerInterface;
 use Faker\{Factory,Generator};
 use Symfony\Component\Console\Command\Command;
@@ -13,7 +13,7 @@ use Symfony\Component\Console\Input\{InputArgument, InputInterface};
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-final class ProjectCreateCommand extends Command
+final class EntityCreateCommand extends Command
 {
     private Generator $faker;
     private EntityManagerInterface $em;
@@ -32,10 +32,11 @@ final class ProjectCreateCommand extends Command
     protected function configure(): void
     {
         $this
-            ->setName('erd:project:create')
-            ->setDescription('Create an project by asking few questions')
-            ->addArgument('name', InputArgument::OPTIONAL, 'The project name')
-            ->addArgument('ownerUsername', InputArgument::OPTIONAL, 'The owner username')
+            ->setName('erd:entity:create')
+            ->setDescription('Create an ERD Entity by asking few questions')
+            ->addArgument('ownerUsername', InputArgument::OPTIONAL, 'The owner name')
+            ->addArgument('projectName', InputArgument::OPTIONAL, 'The project name')
+            ->addArgument('name', InputArgument::OPTIONAL, 'The project title')
         ;
     }
 
@@ -48,18 +49,13 @@ final class ProjectCreateCommand extends Command
     ): int
     {
         $io = new SymfonyStyle($input, $output);
-        $io->title('SmartERD - Project creator assistant');
+        $io->title('SmartERD - Entity creator assistant');
         $io->text('Answer all the questions or press <return> to choose the [<comment>default value</comment>]');
 
         /**
          * TODO: Add validator to questions when Reusable sets of constraints
          *       will be available in Symfony 5.1
          */
-
-        $name = $input->getArgument('name');
-        while (null === $name) {
-            $name = $io->ask('name', $this->faker->company);
-        }
 
         $ownerUsername = $input->getArgument('ownerUsername');
 
@@ -70,29 +66,59 @@ final class ProjectCreateCommand extends Command
             'username' => $ownerUsername
         ]);
 
-        while (null === $ownerUsername && $owner === null) {
+        while (null === $ownerUsername && null === $owner) {
             $ownerUsername = $io->ask('Owner username', UserFixtures::USER_USERNAME);
             $owner = $this->em->getRepository(User::class)->findOneBy([
                 'username' => $ownerUsername
             ]);
         }
 
+        $projectName = $input->getArgument('projectName');
+
+        $project = null;
+
+        // TODO: Check the 2 following condition and correct them. Same for other file
+        /**
+         * @var  Project  $project
+         */
+        if (null !== $projectName) {
+            $project = $this->em
+                ->getRepository(Project::class)
+                ->findOneByUserAndName($owner, $projectName);
+        }
+
+        while (null === $projectName && null === $project) {
+            $projectName = $io->ask('Project name', ProjectFixtures::USER_PROJECT_NAME);
+            /**
+             * @var  Project  $project
+             */
+            $project = $this->em
+                ->getRepository(Project::class)
+                ->findOneByUserAndName($owner, $projectName);
+        }
+
+        $name = $input->getArgument('name');
+        while (null === $name) {
+            $name = $io->ask('Name', $this->faker->jobTitle);
+        }
+
         $ok = $io->confirm(
             'This project will be created:' . PHP_EOL .
-            ' <fg=blue>Name:</> <fg=white>' . $name . '</>' . PHP_EOL .
             ' <fg=blue>Owner:</> <fg=white>' . $ownerUsername . '</>' . PHP_EOL .
+            ' <fg=blue>Project:</> <fg=white>' . $projectName . '</>' . PHP_EOL .
+            ' <fg=blue>Name:</> <fg=white>' . $name . '</>' . PHP_EOL .
             ' Is everything correct ?'
         );
 
         if ($ok) {
             try {
                 $this->em->persist(
-                    (new Project)
+                    (new Entity)
                         ->setName($name)
-                        ->setUser($owner)
+                        ->setProject($project)
                 );
                 $this->em->flush();
-                $io->success(sprintf('The project %s has been created', $name));
+                $io->success(sprintf('The entity %s has been created', $name));
             } catch (\Exception $e) {
                 // $io->error($e->getMessage());
                 $io->error('An error occurred, please try again');

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
+use App\Entity\UniqueStringableInterface;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\{Factory, Generator};
-use InvalidArgumentException;
-use ReflectionClass, ReflectionException;
+use InvalidArgumentException, ReflectionClass, ReflectionException;
 
 abstract class BaseFixture extends Fixture
 {
@@ -43,45 +43,71 @@ abstract class BaseFixture extends Fixture
             $this->manager->persist($entity);
 
             // store for usage later as App\Entity\ClassName_#COUNT#
-            $this->addReference($className . '_' . $i, $entity);
+            $this->addReference($className.'_'.$i, $entity);
         }
     }
 
     /**
      * To have unique reference and to avoid collisions, each reference is
      * prefixed by the name of his class. To be sure there will be no
-     * collisions, the "__toString()" method MUST return something unique (which
+     * collisions, a "toUniqueString" method MUST return something unique (which
      * identify the data). The goal of ths function is to get reference by
      * giving a simple unique which identify the data.
      *
-     * @param  object  $entity
-     * @throws  InvalidArgumentException  In the case where entity would not
-     *                                    have implemented the "__toString()"
-     *                                    method.
-     * @throws  ReflectionException  In the case where a bad parameter would be
-     *                               sent to the ReflectionClass
+     * @param  UniqueStringableInterface  $entity
+     *
+     * @throws  ReflectionException In the case where a bad parameter would be
+     *                              sent to the ReflectionClass
      */
-    public function addSafeReference(object $entity): void
+    public function addSafeReference(UniqueStringableInterface $entity): void
     {
         $function = new ReflectionClass(get_class($entity));
 
-        // Return an error if the entity class doesn't have an unique toString()
-        // method
-        if (!$function->hasMethod('__toString')) {
+        // TO DEBUG, UNCOMMENT THE FOLLOWING LINE :
+        // print_r($function->getShortName().'_'.$entity->toUniqueString().PHP_EOL);
+
+        parent::addReference(
+            $function->getShortName().'_'.$entity->toUniqueString(),
+            $entity
+        );
+    }
+
+    /**
+     * A simpler way to get safe references.
+     *
+     * @param  string  $className  The name of the class
+     * @param  string  $uniquePart The unique part initially used to create the
+     *                             safe reference. This part has normally been
+     *                             created with "toUniqueString()" method.
+     * @return  object  The entity (reference) you are searching.
+     *
+     * @throws  ReflectionException  In the case where a bad parameter would be
+     *                               sent to the ReflectionClass
+     * @throws  InvalidArgumentException  In the case where the class doesn't
+     *                                    implement the
+     *                                    UniqueStringableInterface
+     */
+    public function getSafeReference(
+        string $className,
+        string $uniquePart
+    ): object
+    {
+        $entity = new $className;
+        if (!$entity instanceof UniqueStringableInterface) {
             throw new InvalidArgumentException(
                 sprintf(
-                    "The entity %s must implement a __toString() method.",
-                    get_class($entity)
+                    "The entity %s must implement the %s.",
+                    get_class($entity),
+                    UniqueStringableInterface::class
                 )
             );
         }
+        $function = new ReflectionClass(get_class($entity));
+        unset($entity);
 
         // TO DEBUG, UNCOMMENT THE FOLLOWING LINE :
-        // print_r($function->getShortName() . '_' . strval($entity) . PHP_EOL);
+        // print_r($function->getShortName().'_'.$entity->toUniqueString().PHP_EOL);
 
-        parent::addReference(
-            $function->getShortName() . '_' . strval($entity),
-            $entity
-        );
+        return parent::getReference($function->getShortName().'_'.$uniquePart);
     }
 }

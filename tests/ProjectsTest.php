@@ -6,12 +6,12 @@ namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\ProjectFixtures;
-use App\Repository\ProjectRepository;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\{Project, User};
+use App\Repository\ProjectRepository;
 use App\Tests\Security\JsonAuthenticatorTest;
+use Doctrine\ORM\EntityManagerInterface;
 use Liip\TestFixturesBundle\Test\FixturesTrait;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\{JsonResponse, Request};
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class ProjectsTest extends ApiTestCase
@@ -40,97 +40,93 @@ final class ProjectsTest extends ApiTestCase
 
             $this->fixturesHaveBeenLoaded = true;
         }
+
+        parent::setUp();
     }
 
     public function testCreate(): void
     {
-        $title = 'Test Project';
+        $name = 'Test Project';
 
-        $this->client->request('POST', '/projects', [
-            'json' => ['title' => $title]
+        $this->client->request(Request::METHOD_POST, '/projects', [
+            'json' => ['name' => $name]
         ]);
 
         $this->assertResponseStatusCodeSame(JsonResponse::HTTP_CREATED);
 
         // N.B: $this->json from AbstractController return the header:
-        //      "content-type: application/json"
+        //          "content-type: application/json"
         //      and not:
-        //      "content-type: application/json; charset=utf-8"
+        //          "content-type: application/json; charset=utf-8"
         //      because the developers from Symfony think json should be always
         //      utf-8 encoded but api platform developers think it's more
         //      useful to have the charset for debugging and clarity.
         $this->assertResponseHeaderSame('content-type', 'application/json');
-        $this->assertJsonContains(['title' => $title]);
+        $this->assertJsonContains(['name' => $name]);
     }
 
     /**
      * Same user could not create the same project. A Project is identified by
-     * his author and his title
+     * his author and his name
      */
     public function testCreateSame(): void
     {
-        $sameTitle = 'This title is going to be inserted two times !';
+        $sameName = 'This name is going to be inserted two times !';
 
-        $this->client->request('POST', '/projects', [
-            'json' => ['title' => $sameTitle]
+        $this->client->request(Request::METHOD_POST, '/projects', [
+            'json' => [
+                'name' => $sameName
+            ]
         ]);
 
-        $this->client->request('POST', '/projects', [
-            'json' => ['title' => $sameTitle]
+        $this->client->request(Request::METHOD_POST, '/projects', [
+            'json' => [
+                'name' => $sameName
+            ]
         ]);
 
         $this->assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
         $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         $this->assertJsonContains([
             'title' => 'Validation Failed',
-            'detail' => "title: You have already created a project with this name \"${sameTitle}\""
+            'detail' => "name: You have already created a project with this name \"${sameName}\""
         ]);
     }
 
-    public function testCreateWithTooLongTitle(): void
+    public function testCreateWithTooLongName(): void
     {
-        $tooLongTitle = '';
+        $tooLongName = '';
         for ($i = 0; $i < 100; $i++) {
-            $tooLongTitle .= 'a';
+            $tooLongName .= 'a';
         }
 
-        $this->client->request('POST', '/projects', [
-            'json' => ['title' => $tooLongTitle]
+        $this->client->request(Request::METHOD_POST, '/projects', [
+            'json' => [
+                'name' => $tooLongName
+            ]
         ]);
 
         $this->assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
         $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         $this->assertJsonContains([
             'title' => 'Validation Failed',
-            'detail' => "title: This value is too long. It should have 50 characters or less."
+            'detail' => "name: This value is too long. It should have 50 characters or less."
         ]);
     }
 
     public function testUserCanAccessHisProjects(): void
     {
-        $this->client = JsonAuthenticatorTest::login();
-
-        $response = $this->client->request('GET', '/projects');
+        $this->client = JsonAuthenticatorTest::login($asAdmin = false);
+        $this->client->request(Request::METHOD_GET, '/projects');
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseHeaderSame('Content-Type', 'application/ld+json; charset=utf-8');
-
-        $user = $this->em->getRepository(User::class)
-            ->findOneBy(['username' => 'user']);
-
         $this->assertJsonContains([
             '@context' => '/contexts/Project',
             '@id' => '/projects',
             '@type' => 'hydra:Collection',
-            'hydra:totalItems' => ProjectFixtures::TOTAL_PROJECTS_NUMBER
+            'hydra:totalItems' => 2
         ]);
-
-        // Because test fixtures are automatically loaded between each test, you can assert on them
-        // this assert check that "item per page" is well configured for project resource.
-        $this->assertCount(
-            ProjectRepository::ITEM_PER_PAGE,
-            $response->toArray()['hydra:member']
-        );
 
         // Asserts that the returned JSON is validated by the JSON Schema generated for this resource by API Platform
         // This generated JSON Schema is also used in the OpenAPI spec!
@@ -139,9 +135,7 @@ final class ProjectsTest extends ApiTestCase
 
     public function testAdminCanAccessAllProjects(): void
     {
-        $this->client = JsonAuthenticatorTest::login();
-
-        $this->client->request('GET', '/projects');
+        $this->client->request(Request::METHOD_GET, '/projects');
 
         $projectsCountDQL = <<<DQL
             SELECT
@@ -184,11 +178,7 @@ final class ProjectsTest extends ApiTestCase
      */
     public function testOtherUserProjectAreNotAvailableAsUser(): void
     {
-        // 1. Login as an user to try to access administrator projects
-        //    The following tests will be done
-        //     - User can't access other user projects
-        //     - Errors are correctly formatted.
-        $this->client = JsonAuthenticatorTest::login(false);
+        $this->client = JsonAuthenticatorTest::login($asAdmin = false);
 
         /**
          * We have to retrieve the admin entity to find the project iri.
@@ -201,7 +191,7 @@ final class ProjectsTest extends ApiTestCase
         // findIriBy allows to retrieve the IRI of an item by searching for some
         // of its properties.
         $url = $this->findIriBy(Project::class, [
-            'title' => ProjectFixtures::ADMIN_PROJECT_NAME,
+            'name' => ProjectFixtures::ADMIN_PROJECT_NAME,
             'user' => $admin
         ]);
 
@@ -216,7 +206,7 @@ final class ProjectsTest extends ApiTestCase
 
         // We are asking for a admin project so it must return a 404 response
         // not a 403 because otherwise an other user can see the id is valid.
-        $this->client->request('GET', $url);
+        $this->client->request(Request::METHOD_GET, $url);
 
         $this->assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
         $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
@@ -224,12 +214,6 @@ final class ProjectsTest extends ApiTestCase
 
     public function testUserProjectsAreAvailableAsAdmin(): void
     {
-        // 1. Login as an admin to try to access user projects
-        //    The following tests will be done
-        //     - admin can access other user projects
-        //     - response is correctly formatted
-        $this->client = JsonAuthenticatorTest::login(true);
-
         /**
          * We have to retrieve the user entity to find the project iri.
          *
@@ -241,12 +225,12 @@ final class ProjectsTest extends ApiTestCase
         // findIriBy allows to retrieve the IRI of an item by searching for some
         // of its properties.
         $url = $this->findIriBy(Project::class, [
-            'title' => ProjectFixtures::USER_PROJECT_NAME,
+            'name' => ProjectFixtures::USER_PROJECT_NAME,
             'user' => $user
         ]);
 
         // We are asking for a admin project so it must return a 403 response
-        $response = $this->client->request('GET', $url);
+        $response = $this->client->request(Request::METHOD_GET, $url);
 
         $this->assertResponseIsSuccessful();
         $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
@@ -254,7 +238,7 @@ final class ProjectsTest extends ApiTestCase
         $this->assertJsonContains([
             '@context' => '/contexts/Project',
             '@type' => 'https://schema.org/Project',
-            'title' => ProjectFixtures::USER_PROJECT_NAME,
+            'name' => ProjectFixtures::USER_PROJECT_NAME,
         ]);
         $this->assertRegExp('~^/projects/\d+$~', $response->toArray()['@id']);
         $this->assertMatchesResourceItemJsonSchema(Project::class);

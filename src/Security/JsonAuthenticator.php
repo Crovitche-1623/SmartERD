@@ -57,6 +57,7 @@ final class JsonAuthenticator extends AbstractGuardAuthenticator
     {
         // We only ask for authentication if we're on the login page.
         // Otherwise, we ask a token for each request.
+        // TODO: Check that the request "Content-Type" is "application/json"
         if ("login" === $request->attributes->get('_route') &&
             $request->isMethod('POST')) {
 

@@ -39,29 +39,32 @@ final class ProjectFixtures extends BaseFixture implements
         /**
          * @var  User  $admin
          */
-        $admin = $this->getReference('User_admin');
-        $manager->persist(
-            (new Project)
-                ->setTitle(self::ADMIN_PROJECT_NAME)
-                ->setUser($admin)
-        );
+        $admin = $this->getSafeReference(User::class, UserFixtures::ADMIN_USERNAME);
+        $firstAdminProject = (new Project)
+            ->setName(self::ADMIN_PROJECT_NAME)
+            ->setUser($admin);
         unset($admin);
+        $manager->persist($firstAdminProject);
+        $this->addSafeReference($firstAdminProject);
+        unset($firstAdminProject);
 
         /**
          * @var  User  $user
          */
-        $user = $this->getReference('User_user');
-        $manager->persist(
-            (new Project)
-                ->setTitle(self::USER_PROJECT_NAME)
-                ->setUser($user)
-        );
-        $manager->persist(
-            (new Project)
-                ->setTitle('A second user project for testing purpose')
-                ->setUser($user)
-        );
+        $user = $this->getSafeReference(User::class, UserFixtures::USER_USERNAME);
+        $firstUserProject = (new Project)
+            ->setName(self::USER_PROJECT_NAME)
+            ->setUser($user);
+        $manager->persist($firstUserProject);
+        $this->addSafeReference($firstUserProject);
+        unset($firstUserProject);
+        $secondUserProject = (new Project)
+            ->setName('A second user project for testing purpose')
+            ->setUser($user);
         unset($user);
+        $manager->persist($secondUserProject);
+        $this->addSafeReference($secondUserProject);
+        unset($secondUserProject);
 
         $this->createMany(
             Project::class,
@@ -81,7 +84,7 @@ final class ProjectFixtures extends BaseFixture implements
             unset($userNumber);
 
             $project
-                ->setTitle($this->faker->company)
+                ->setName($this->faker->company)
                 ->setUser($creator)
             ;
         });

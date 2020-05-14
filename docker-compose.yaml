@@ -1,0 +1,34 @@
+version: '3.4'
+services:
+  db:
+    image: postgres:10-alpine
+    ports:
+      - '5432:5432' # On expose le port pour pouvoir inspecter la base pendant la phase de développement
+    environment:
+      POSTGRES_DB: smarterd
+      POSTGRES_USER: smarterd
+      POSTGRES_PASSWORD: "!ChangeMe!"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+  php:
+    build: docker/php-fpm
+    ports:
+      - '9000:9000'
+    volumes:
+      - ./:/var/www/smarterd:cached
+      - ./var/log:/var/www/smarterd/var/log:cached
+    depends_on:
+      - db
+  nginx:
+    build: docker/nginx
+    ports:
+      - '8080:80'
+    links:
+      - php
+    volumes:
+      - ./:/var/www/smarterd:delegated
+      - ./docker/nginx/logs/:/var/log/nginx:cached
+
+volumes:
+  db-data:
+    driver: local

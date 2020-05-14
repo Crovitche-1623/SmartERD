@@ -90,7 +90,10 @@ final class CurrentUserExtension implements
         }
 
         $rootAlias = $queryBuilder->getRootAliases()[0];
-        $queryBuilder->andWhere(sprintf('%s.user = :current_user', $rootAlias));
-        $queryBuilder->setParameter('current_user', $user->getId());
+        $queryBuilder
+            ->innerJoin(sprintf('%s.user', $rootAlias), 'u')
+            ->andWhere('u.username = :username')
+            ->setParameter('username', $user->getUsername())
+        ;
     }
 }

@@ -19,28 +19,15 @@ These are used to have a model of the database while ignoring the RDBMS used.
     $   cd SmartERD/
     ```
  2. Modify the DATABASE_URL config in .env if necessary and start PostgreSQL.
- 3. (optional) Drop the existing database if it already exist:
+ 3. Launch the setup command:
     ```
-    $   php bin/console d:d:d --if-exists --force
+    $   php bin/console app:setup
     ```
- 4. Create the database:
-    ```
-    $   php bin/console d:d:c
-    ```
- 5. Create the database schema:
-    ```
-    $   php bin/console d:s:c
-    ```
- 6. Load the fixtures:
-    ```
-    $   php bin/console d:f:l -n
-    ```
- 7. Start the application using the Symfony binary and don't forget to add the
-    "--no-ansi" flag if you're working on Windows:
+ 4. Launch the Symfony local server:
     ```
     $   symfony serve --no-tls --no-ansi
-    ```
- 8. Open a browser and access the application with the given URL and enjoy !
+    ``` 
+ 5. Open a browser and access the application with the given URL and enjoy !
  
 ## Tests
 Execute theses commands to run tests:
