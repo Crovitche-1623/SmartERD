@@ -56,9 +56,9 @@ final class JsonAuthenticatorTest extends ApiTestCase
     {
         static::createClient()->request('GET', '/');
 
-        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_UNAUTHORIZED);
-        $this->assertResponseHasHeader('Content-Type', 'application/json');
-        $this->assertJson('{"message" : "Authentification par nom et mot de passe nécessaire"}');
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNAUTHORIZED);
+        self::assertResponseHasHeader('Content-Type', 'application/json');
+        self::assertJson('{"message" : "Authentification par nom et mot de passe nécessaire"}');
     }
 
     public function testLoginPageReturnTokenKey(): void
@@ -72,9 +72,9 @@ final class JsonAuthenticatorTest extends ApiTestCase
 
         $content = $response->toArray();
 
-        $this->assertResponseIsSuccessful();
-        $this->assertArrayHasKey('token', $content);
-        $this->assertResponseHasHeader('Content-Type', 'application/json');
+        self::assertResponseIsSuccessful();
+        self::assertArrayHasKey('token', $content);
+        self::assertResponseHasHeader('Content-Type', 'application/json');
     }
 
     public function testLoginPageReturnAValidToken(): void
@@ -96,7 +96,7 @@ final class JsonAuthenticatorTest extends ApiTestCase
             $jwtIsValid = false;
         }
 
-        $this->assertResponseIsSuccessful();
-        $this->assertTrue($jwtIsValid);
+        self::assertResponseIsSuccessful();
+        self::assertTrue($jwtIsValid);
     }
 }

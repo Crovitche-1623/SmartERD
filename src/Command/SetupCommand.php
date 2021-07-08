@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use Symfony\Component\Console\Command\Command;
@@ -9,6 +11,14 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 final class SetupCommand extends Command
 {
+    private string $jwtConfigDir;
+
+    public function __construct(string $name = null, string $projectDirectory)
+    {
+        parent::__construct($name);
+        $this->jwtConfigDir = $projectDirectory . '/config/jwt';
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -61,6 +71,23 @@ final class SetupCommand extends Command
                 ->get('doctrine:schema:create')
                 ->run(new ArrayInput([]), new NullOutput)
             ;
+        }
+
+        if (0 === $returnCode) {
+            $privateKey = openssl_pkey_new([
+                'private_key_type' => OPENSSL_KEYTYPE_RSA,
+                'private_key_bits' => 4096
+            ]);
+
+            $privateKeyFileName = $this->jwtConfigDir . '/private.pem';
+
+            openssl_pkey_export_to_file($privateKey, $privateKeyFileName);
+
+            $publicKey = openssl_pkey_get_details($privateKey)['key'];
+
+            file_put_contents($this->jwtConfigDir . '/public.pem', $publicKey);
+
+            $returnCode = 0;
         }
 
         if (0 === $returnCode) {

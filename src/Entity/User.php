@@ -243,6 +243,6 @@ class User implements UserInterface, JWTUserInterface, UniqueStringableInterface
         return (new self)
             ->setUsername($username)
             ->setRoles($payload['roles'])
-            ->setId($payload['sub']);
+            ->setId((int) $payload['sub']);
     }
 }

@@ -52,7 +52,7 @@ final class ProjectsTest extends ApiTestCase
             'json' => ['name' => $name]
         ]);
 
-        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_CREATED);
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_CREATED);
 
         // N.B: $this->json from AbstractController return the header:
         //          "content-type: application/json"
@@ -61,8 +61,8 @@ final class ProjectsTest extends ApiTestCase
         //      because the developers from Symfony think json should be always
         //      utf-8 encoded but api platform developers think it's more
         //      useful to have the charset for debugging and clarity.
-        $this->assertResponseHeaderSame('content-type', 'application/json');
-        $this->assertJsonContains(['name' => $name]);
+        self::assertResponseHeaderSame('content-type', 'application/json');
+        self::assertJsonContains(['name' => $name]);
     }
 
     /**
@@ -85,9 +85,9 @@ final class ProjectsTest extends ApiTestCase
             ]
         ]);
 
-        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
-        $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
-        $this->assertJsonContains([
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
+        self::assertJsonContains([
             'title' => 'Validation Failed',
             'detail' => "name: You have already created a project with this name \"${sameName}\""
         ]);
@@ -95,20 +95,15 @@ final class ProjectsTest extends ApiTestCase
 
     public function testCreateWithTooLongName(): void
     {
-        $tooLongName = '';
-        for ($i = 0; $i < 100; $i++) {
-            $tooLongName .= 'a';
-        }
-
         $this->client->request(Request::METHOD_POST, '/projects', [
             'json' => [
-                'name' => $tooLongName
+                'name' => str_repeat('a', 100)
             ]
         ]);
 
-        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
-        $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
-        $this->assertJsonContains([
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
+        self::assertJsonContains([
             'title' => 'Validation Failed',
             'detail' => "name: This value is too long. It should have 50 characters or less."
         ]);
@@ -119,9 +114,9 @@ final class ProjectsTest extends ApiTestCase
         $this->client = JsonAuthenticatorTest::login($asAdmin = false);
         $this->client->request(Request::METHOD_GET, '/projects');
 
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseHeaderSame('Content-Type', 'application/ld+json; charset=utf-8');
-        $this->assertJsonContains([
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('Content-Type', 'application/ld+json; charset=utf-8');
+        self::assertJsonContains([
             '@context' => '/contexts/Project',
             '@id' => '/projects',
             '@type' => 'hydra:Collection',
@@ -130,7 +125,7 @@ final class ProjectsTest extends ApiTestCase
 
         // Asserts that the returned JSON is validated by the JSON Schema generated for this resource by API Platform
         // This generated JSON Schema is also used in the OpenAPI spec!
-        $this->assertMatchesResourceCollectionJsonSchema(Project::class);
+        self::assertMatchesResourceCollectionJsonSchema(Project::class);
     }
 
     public function testAdminCanAccessAllProjects(): void
@@ -144,31 +139,28 @@ final class ProjectsTest extends ApiTestCase
                 App\Entity\Project p
         DQL;
 
-        /**
-         * @var  integer  $projectsCount
-         */
-        $projectsCount = $this->em
+        $projectsCount = (int) $this->em
             ->createQuery($projectsCountDQL)
             ->getSingleScalarResult();
 
-        $lastPage = ceil((int) $projectsCount / ProjectRepository::ITEM_PER_PAGE);
+        $lastPage = (int) ceil($projectsCount / ProjectRepository::ITEM_PER_PAGE);
 
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
-        $this->assertJsonContains([
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+        self::assertJsonContains([
             '@context' => '/contexts/Project',
             "@id" => "/projects",
             "@type" => "hydra:Collection",
-            "hydra:totalItems" => intval($projectsCount),
+            "hydra:totalItems" => $projectsCount,
             "hydra:view" => [
                 "@id" => "/projects?page=1",
                 "@type" => "hydra:PartialCollectionView",
                 "hydra:first" => "/projects?page=1",
-                "hydra:last" => "/projects?page=" . (int) $lastPage,
+                "hydra:last" => "/projects?page=" . $lastPage,
                 "hydra:next" => "/projects?page=2"
             ]
         ]);
-        $this->assertMatchesResourceCollectionJsonSchema(Project::class);
+        self::assertMatchesResourceCollectionJsonSchema(Project::class);
     }
 
     /**
