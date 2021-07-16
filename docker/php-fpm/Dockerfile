@@ -21,7 +21,7 @@ RUN apt-get install -y libzip-dev libicu-dev zlib1g-dev libpq-dev libxml2-dev \
     && docker-php-ext-install intl \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql \
-    && docker-php-ext-install zip xml \
+    && docker-php-ext-install unzip zip xml \
     && docker-php-ext-install opcache
 
 # Installation de Composer
