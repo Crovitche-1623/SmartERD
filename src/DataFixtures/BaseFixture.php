@@ -66,8 +66,8 @@ abstract class BaseFixture extends Fixture
         // TO DEBUG, UNCOMMENT THE FOLLOWING LINE :
         // print_r($function->getShortName().'_'.$entity->toUniqueString().PHP_EOL);
 
-        parent::addReference(
-            $function->getShortName().'_'.$entity->toUniqueString(),
+        $this->addReference(
+            $function->getShortName() . '_' . $entity->toUniqueString(),
             $entity
         );
     }
@@ -108,6 +108,8 @@ abstract class BaseFixture extends Fixture
         // TO DEBUG, UNCOMMENT THE FOLLOWING LINE :
         // print_r($function->getShortName().'_'.$entity->toUniqueString().PHP_EOL);
 
-        return parent::getReference($function->getShortName().'_'.$uniquePart);
+        return $this->getReference(
+            $function->getShortName() . '_' . $uniquePart
+        );
     }
 }
