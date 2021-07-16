@@ -8,35 +8,36 @@ These are used to have a model of the database while ignoring the RDBMS used.
 
 ## Requirements
  * PHP 7.4.3 or higher;
- * PostgreSQL 10.11-1 or higher (The proper functioning of other RDBMS is not guaranteed);
- * PDO-PGSQL PHP Extension Enabled;
- * The [Symfony Binary](https://symfony.com/download) if you want to run the project in development mode;
- * and the usual [Symfony application requirements](https://symfony.com/doc/current/reference/requirements.html).
+ * PostgreSQL 10.11-1 or higher (The proper functioning of other RDBMS isn't 
+   guaranteed);
+ * PDO-PGSQL PHP Extension Enabled and all extensions specified in the 
+   "composer.json" file;
+ * Docker (if you want to run the project in development mode);
+ * The usual [Symfony application requirements](https://symfony.com/doc/current/reference/requirements.html).
  
 ## Setup
- 1. Get into the project directory:
+ 1. Create and run all services using Docker
     ```
-    $   cd SmartERD/
+    $   docker compose up -d
     ```
- 2. Modify the DATABASE_URL config in .env if necessary and start PostgreSQL.
+ 2. Install dependencies with Composer
+    ```
+    $   docker compose exec php composer install -n
+    ```
  3. Launch the setup command:
     ```
     $   php bin/console app:setup
     ```
- 4. Launch the Symfony local server:
-    ```
-    $   symfony serve --no-tls --no-ansi
-    ``` 
- 5. Open a browser and access the application with the given URL and enjoy !
+ 4. Open [the app](http://localhost:9000) in your favorite Web Browser.
  
 ## Tests
-Execute theses commands to run tests:
-A SQLite database is used for tests so we must configure it: 
- 1. Launch the setup command:
+Execute these commands to run tests:
+ 1. Execute steps 1 & 2 from the [setup section](#Setup).
+ 2. Launch the setup command:
     ```
     $   php bin/console app:setup --env=test
     ```
- 2. Run the tests:
+ 3. Run the tests:
     ```
-    $   php bin/phpunit
+    $   php vendor/bin/phpunit .
     ```

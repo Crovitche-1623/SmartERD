@@ -11,11 +11,12 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 final class SetupCommand extends Command
 {
+    protected static $defaultName = 'app:setup';
     private string $jwtConfigDir;
 
-    public function __construct(string $name = null, string $projectDirectory)
+    public function __construct(string $projectDirectory)
     {
-        parent::__construct($name);
+        parent::__construct(self::$defaultName);
         $this->jwtConfigDir = $projectDirectory . '/config/jwt';
     }
 
@@ -26,7 +27,7 @@ final class SetupCommand extends Command
     {
         $this
             ->setHidden(true)
-            ->setName('app:setup')
+            ->setName(self::$defaultName)
             ->setDescription(<<<TXT
             Drop the existing database, create a new one, validate the schema,
             create the database schema and load the fixtures.
