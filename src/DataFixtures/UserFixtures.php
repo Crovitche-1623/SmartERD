@@ -6,6 +6,7 @@ namespace App\DataFixtures;
 
 use App\Entity\User;
 use Doctrine\Persistence\ObjectManager;
+use ReflectionException;
 
 final class UserFixtures extends BaseFixture
 {
@@ -16,6 +17,8 @@ final class UserFixtures extends BaseFixture
 
     /**
      * {@inheritDoc}
+     *
+     * @throws ReflectionException
      */
     public function loadData(ObjectManager $manager): void
     {
@@ -40,8 +43,8 @@ final class UserFixtures extends BaseFixture
 
         $this->createMany(User::class, self::USERS_NUMBER, function (User $u) {
             $u
-                ->setUsername($this->faker->unique()->userName)
-                ->setEmail($this->faker->unique()->companyEmail)
+                ->setUsername($this->faker->unique()->userName())
+                ->setEmail($this->faker->unique()->companyEmail())
                 ->setPlainPassword(self::DEFAULT_USER_PASSWORD)
             ;
         });

@@ -7,13 +7,17 @@ namespace App\Security;
 use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request};
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\{
     AuthenticationException,
-    UsernameNotFoundException
+    UserNotFoundException
 };
-use Symfony\Component\Security\Core\User\{UserInterface, UserProviderInterface};
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\PasswordUpgradeBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\Authenticator\Passport\PassportInterface;
+use Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 /**
  * This class is responsible for identifying the user from the login page only.
@@ -21,18 +25,13 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
  * the login page. If the credentials are correct, a JWT token is returned.
  * Please note, the JWT token is returned from the SecurityController.php
  */
-final class JsonAuthenticator extends AbstractGuardAuthenticator
+final class JsonAuthenticator extends AbstractAuthenticator implements AuthenticationEntryPointInterface
 {
     private UserRepository $userRepository;
-    private UserPasswordEncoderInterface $passwordEncoder;
 
-    public function __construct(
-        UserRepository $userRepository,
-        UserPasswordEncoderInterface $passwordEncoder
-    )
+    public function __construct(UserRepository $userRepository)
     {
         $this->userRepository = $userRepository;
-        $this->passwordEncoder = $passwordEncoder;
     }
 
     /**
@@ -62,7 +61,7 @@ final class JsonAuthenticator extends AbstractGuardAuthenticator
             $request->isMethod('POST')) {
 
             // Parameters validation
-            $credentials = json_decode($request->getContent(), true);
+            $credentials = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
             if (!empty($credentials['username']) &&
                 !empty($credentials['password'])) {
@@ -76,63 +75,27 @@ final class JsonAuthenticator extends AbstractGuardAuthenticator
     /**
      * {@inheritDoc}
      */
-    public function getCredentials(Request $request): array
+    public function authenticate(Request $request): PassportInterface
     {
-        $credentials = json_decode($request->getContent(), true);
+        $credentials = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
 
-        return [
-            'username' => $credentials['username'],
-            'password' => $credentials['password']
-        ];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getUser(
-        $credentials,
-        UserProviderInterface $userProvider
-    ): ?UserInterface
-    {
-        $username = $credentials['username'];
-        $password = $credentials['password'];
-
-        if ('' === $username && '' === $password) {
-            throw new AuthenticationException(
-                "Le nom d'utilisateur et le mot de passe sont nécessaires."
-            );
-        }
-
-        $employee = $this->userRepository->findOneBy([
-            'username' => $username
+        $user = $this->userRepository->findOneBy([
+           'username' => $credentials['username']
         ]);
 
-        if (null === $employee) {
-            throw new UsernameNotFoundException(
-                "Aucun utilisateur avec ce nom d'utilisateur existe."
-            );
+        if (!$user) {
+            throw new UserNotFoundException("Aucun utilisateur avec ce nom d'utilisateur existe.");
         }
 
-        return $employee;
-    }
+        $password = $credentials['password'];
 
-    /**
-     * {@inheritDoc}
-     */
-    public function checkCredentials(
-        $credentials,
-        UserInterface $employee
-    ): bool
-    {
-        if (!$this->passwordEncoder->isPasswordValid(
-                $employee,
-                $credentials['password']
-            )
-        ) {
-            throw new AuthenticationException('Le mot de passe est incorrect.');
-        }
-
-        return true;
+        return new Passport(
+            new UserBadge($user->getUserIdentifier()),
+            new PasswordCredentials($password),
+            [
+                new PasswordUpgradeBadge($password, $this->userRepository)
+            ]
+        );
     }
 
     /**
@@ -159,20 +122,12 @@ final class JsonAuthenticator extends AbstractGuardAuthenticator
     public function onAuthenticationSuccess(
         Request $request,
         TokenInterface $token,
-        string $providerKey
-    )
+        string $firewallName
+    ): ?JsonResponse
     {
         // The JWT is returned from the SecurityController.php so we don't
         // generate one here. The request continue by returning null in this
         // method.
         return null;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function supportsRememberMe(): bool
-    {
-        return false;
     }
 }

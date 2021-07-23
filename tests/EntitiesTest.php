@@ -11,15 +11,13 @@ use App\Entity\Project;
 use App\Tests\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\{EntityManagerInterface, NonUniqueResultException, NoResultException};
 use Faker\{Factory, Generator};
-use Liip\TestFixturesBundle\Test\FixturesTrait;
+use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class EntitiesTest extends ApiTestCase
 {
-    use FixturesTrait;
-
     private EntityManagerInterface $em;
     private HttpClientInterface $client;
     private Generator $faker;
@@ -32,10 +30,11 @@ final class EntitiesTest extends ApiTestCase
     {
         $kernel = self::bootKernel();
         $this->em = $kernel->getContainer()->get('doctrine')->getManager();
+        $databaseTool = $kernel->getContainer()->get(DatabaseToolCollection::class)->get();
         $this->client = JsonAuthenticatorTest::login($asAdmin = false);
         $this->faker = Factory::create('fr_CH');
         if (!$this->fixturesHaveBeenLoaded) {
-            $this->loadFixtures([
+            $databaseTool->loadFixtures([
                 // Because ProjectFixtures need UserFixtures, UserFixtures are
                 // automatically loaded.
                 EntityFixtures::class
@@ -71,9 +70,9 @@ final class EntitiesTest extends ApiTestCase
 
         $this->client->request(Request::METHOD_GET, $adminEntityIri);
 
-        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
-        $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
-        $this->assertJsonContains([
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
+        self::assertJsonContains([
             'title' => 'An error occurred',
             'detail' => "Not Found"
         ]);
@@ -92,9 +91,9 @@ final class EntitiesTest extends ApiTestCase
             ]
         ]);
 
-        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
-        $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
-        $this->assertJsonContains([
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
+        self::assertJsonContains([
             'title' => 'An error occurred',
             'detail' => "Item not found for \"${adminProjectIri}\"."
         ]);
@@ -129,9 +128,9 @@ final class EntitiesTest extends ApiTestCase
             ]
         ]);
 
-        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
-        $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
-        $this->assertJsonContains([
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
+        self::assertJsonContains([
             'title' => 'An error occurred',
             'detail' => "project: The maximum number of entities per project is 30."
         ]);
@@ -141,18 +140,13 @@ final class EntitiesTest extends ApiTestCase
     }
 
     /**
-     * @param  string  $projectName
-     * @param  string  $username
      *
      * @return  bool  Return false if the project doesn't exist
      * @throws  NonUniqueResultException  If the database structure has changed
      *                                    and many result are returned with the
      *                                    given parameters.
      */
-    private function purgeUserProject(
-        string $projectName = ProjectFixtures::USER_PROJECT_NAME,
-        string $username = UserFixtures::USER_USERNAME
-    ): bool
+    private function purgeUserProject(): bool
     {
         try {
             $projectId = $this->em
@@ -166,8 +160,8 @@ final class EntitiesTest extends ApiTestCase
                         u1.username = :username AND
                         p0.name = :projectName
                 DQL)
-                ->setParameter('username', $username, 'string')
-                ->setParameter('projectName', $projectName, 'string')
+                ->setParameter('username', UserFixtures::USER_USERNAME, 'string')
+                ->setParameter('projectName', ProjectFixtures::USER_PROJECT_NAME, 'string')
                 ->getSingleScalarResult();
         } catch (NoResultException $e) {
             return false;

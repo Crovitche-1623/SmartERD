@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -16,9 +17,20 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table(name = "member") To avoid the reserved SQL word "user"
  * @Assert\EnableAutoMapping
  */
-class User implements UserInterface, JWTUserInterface, UniqueStringableInterface
+class User implements UserInterface, JWTUserInterface, UniqueStringableInterface, PasswordAuthenticatedUserInterface
 {
     use IdTrait;
+
+    /**
+     * @
+     * @ORM\Id
+     * @ORM\Column(type = "integer")
+     * @ORM\GeneratedValue
+     *
+     * ID can be nullable because the id is only received after the data has
+     * been persisted.
+     */
+    protected ?int $id = null;
 
     /**
      * @ORM\Column(length = 180, unique = true)
@@ -74,6 +86,11 @@ class User implements UserInterface, JWTUserInterface, UniqueStringableInterface
     public function __toString(): string
     {
         return $this->username;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->toUniqueString();
     }
 
     /**
@@ -240,9 +257,18 @@ class User implements UserInterface, JWTUserInterface, UniqueStringableInterface
      */
     public static function createFromPayload($username, array $payload): self
     {
-        return (new self)
-            ->setUsername($username)
-            ->setRoles($payload['roles'])
-            ->setId((int) $payload['sub']);
+        $user = new self;
+
+        $user->setUsername($username);
+
+        if (array_key_exists('roles', $payload)) {
+            $user->setRoles($payload['roles']);
+        }
+
+        if (array_key_exists('sub', $payload)) {
+            $user->setId((int) $payload['sub']);
+        }
+
+        return $user;
     }
 }

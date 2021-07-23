@@ -56,8 +56,8 @@ abstract class BaseFixture extends Fixture
      *
      * @param  UniqueStringableInterface  $entity
      *
-     * @throws  ReflectionException In the case where a bad parameter would be
-     *                              sent to the ReflectionClass
+     * @throws  ReflectionException  In the case where a bad parameter would be
+     *                               sent to the ReflectionClass
      */
     public function addSafeReference(UniqueStringableInterface $entity): void
     {
@@ -76,9 +76,9 @@ abstract class BaseFixture extends Fixture
      * A simpler way to get safe references.
      *
      * @param  string  $className  The name of the class
-     * @param  string  $uniquePart The unique part initially used to create the
-     *                             safe reference. This part has normally been
-     *                             created with "toUniqueString()" method.
+     * @param  string  $uniquePart  The unique part initially used to create the
+     *                              safe reference. This part has normally been
+     *                              created with "toUniqueString()" method.
      * @return  object  The entity (reference) you are searching.
      *
      * @throws  ReflectionException  In the case where a bad parameter would be

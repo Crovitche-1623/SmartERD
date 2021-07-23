@@ -1,10 +1,10 @@
 security:
+    enable_authenticator_manager: true
     role_hierarchy:
         ROLE_ADMIN: ROLE_USER
 
-    encoders:
-        App\Entity\User:
-            algorithm: auto
+    password_hashers:
+        App\Entity\User: 'auto'
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
@@ -21,15 +21,19 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-        main:
+        login:
+            pattern: ^/login
             stateless: true
-            anonymous: true
+            json_login:
+                check_path: /login_check
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            provider: app_user_provider
+        main:
+            pattern: ^/
+            stateless: true
             provider: jwt
-            guard:
-                authenticators:
-                    - App\Security\JsonAuthenticator
-                    - lexik_jwt_authentication.jwt_token_authenticator
-                entry_point: App\Security\JsonAuthenticator
+            jwt: ~
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#firewalls-authentication
@@ -40,7 +44,7 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        - { path: ^/docs, roles: IS_AUTHENTICATED_ANONYMOUSLY } # Allows accessing the Swagger UI
-        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/test, roles: IS_AUTHENTICATED_ANONYMOUSLY } # TODO: Remove it in production
+        - { path: ^/docs, roles: PUBLIC_ACCESS } # Allows accessing the Swagger UI
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/test, roles: PUBLIC_ACCESS } # TODO: Remove it in production
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

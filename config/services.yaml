@@ -2,64 +2,56 @@
 # Files in the packages/ subdirectory configure your dependencies.
 
 # Put parameters here that don't need to change on each machine where the app is deployed
-# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
 
 services:
-    # default configuration for services in *this* file
-    _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
-        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
-        bind:
-            $projectDirectory: '%kernel.project_dir%'
+  # default configuration for services in *this* file
+  _defaults:
+    autowire: true      # Automatically injects dependencies in your services.
+    autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+    bind:
+      $projectDirectory: '%kernel.project_dir%'
 
-    # makes classes in src/ available to be used as services
-    # this creates a service per class whose id is the fully-qualified class name
-    App\:
-        resource: '../src/*'
-        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+  # makes classes in src/ available to be used as services
+  # this creates a service per class whose id is the fully-qualified class name
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/DependencyInjection/'
+      - '../src/Entity/'
+      - '../src/Kernel.php'
+      - '../src/Tests/'
 
-    # controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Controller\:
-        resource: '../src/Controller'
-        tags: ['controller.service_arguments']
+  # add more service definitions when explicit configuration is needed
+  # please note that last definitions always *replace* previous ones
+  _instanceof:
+    Doctrine\Common\EventSubscriber:
+      tags:
+        - { name: doctrine.event_subscriber }
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
-    App\EventSubscriber\HashUserPasswordSubscriber:
-        autowire: true
-        tags:
-            - { name: doctrine.event_subscriber }
+  App\EventListener\AddSubFieldOnJWTPayloadListener:
+    tags:
+      - { name: kernel.event_listener, event: lexik_jwt_authentication.on_jwt_created, method: onJWTCreated }
 
-    App\EventSubscriber\SetProjectOwnerSubscriber:
-        autowire: true
-        tags:
-            - { name: doctrine.event_subscriber }
+  App\OpenApi\JwtDecorator:
+    decorates: 'api_platform.openapi.factory'
+    autoconfigure: false
 
-    App\Swagger\SwaggerDecorator:
-        decorates: 'api_platform.swagger.normalizer.documentation'
-        arguments: ['@App\Swagger\SwaggerDecorator.inner']
-        autoconfigure: false
+  App\OpenApi\CreateProjectDecorator:
+    decorates: 'api_platform.openapi.factory'
+    autoconfigure: false
 
-    App\Swagger\CreateProjectDecorator:
-        decorates: 'api_platform.swagger.normalizer.documentation'
-        arguments: ['@App\Swagger\CreateProjectDecorator.inner']
-        autoconfigure: false
+  App\Swagger\CurrentUserDecorator:
+    decorates: 'api_platform.swagger.normalizer.documentation'
+    arguments: [ '@App\Swagger\CurrentUserDecorator.inner' ]
+    autoconfigure: false
 
-    App\Swagger\CurrentUserDecorator:
-        decorates: 'api_platform.swagger.normalizer.documentation'
-        arguments: ['@App\Swagger\CurrentUserDecorator.inner']
-        autoconfigure: false
+  App\Doctrine\CurrentUserExtension:
+    tags:
+      - { name: api_platform.doctrine.orm.query_extension.collection }
+      - { name: api_platform.doctrine.orm.query_extension.item }
 
-    App\Doctrine\CurrentUserExtension:
-        tags:
-            - { name: api_platform.doctrine.orm.query_extension.collection }
-            - { name: api_platform.doctrine.orm.query_extension.item }
-
-    App\Doctrine\EntitiesBelongingToProjectOfCurrentUserExtension:
-        tags:
-            - { name: api_platform.doctrine.orm.query_extension.item }
-
-
-
+  App\Doctrine\EntitiesBelongingToProjectOfCurrentUserExtension:
+    tags:
+      - { name: api_platform.doctrine.orm.query_extension.item }

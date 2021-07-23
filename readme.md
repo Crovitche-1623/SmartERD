@@ -26,7 +26,7 @@ These are used to have a model of the database while ignoring the RDBMS used.
     ```
  3. Launch the setup command:
     ```
-    $   php bin/console app:setup
+    $   docker compose exec php bin/console app:setup
     ```
  4. Open [the app](http://localhost:9000) in your favorite Web Browser.
  
@@ -39,5 +39,5 @@ Execute these commands to run tests:
     ```
  3. Run the tests:
     ```
-    $   php vendor/bin/phpunit .
+    $   docker compose exec php vendor/bin/phpunit .
     ```

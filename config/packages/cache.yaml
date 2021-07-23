@@ -15,13 +15,5 @@ framework:
         #app: cache.adapter.apcu
 
         # Namespaced pools use the above "app" backend by default
-        pools:
-            doctrine.result_cache_pool:
-                adapter: cache.app
-            doctrine.metadata_cache_pool:
-                adapter: cache.adapter.filesystem
-            doctrine.query_cache_pool:
-                adapter: cache.system
-
         #pools:
             #my.dedicated.cache: null

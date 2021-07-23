@@ -6,7 +6,7 @@ namespace App\Repository;
 
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\{OptimisticLockException,ORMException};
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\{
@@ -31,13 +31,13 @@ final class UserRepository extends ServiceEntityRepository implements PasswordUp
      * Used to upgrade (rehash) the user's password automatically over time.
      *
      * @param  UserInterface  $user
-     * @param  string  $newEncodedPassword
+     * @param  string  $newHashedPassword
      * @throws  ORMException
      * @throws  OptimisticLockException
      */
     public function upgradePassword(
         UserInterface $user,
-        string $newEncodedPassword
+        string $newHashedPassword
     ): void
     {
         if (!$user instanceof User) {
@@ -48,9 +48,8 @@ final class UserRepository extends ServiceEntityRepository implements PasswordUp
                 )
             );
         }
-        $user->setHashedPassword($newEncodedPassword);
+        $user->setHashedPassword($newHashedPassword);
         $this->_em->persist($user);
-        unset($user);
         $this->_em->flush();
     }
 }

@@ -6,18 +6,16 @@ namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\ProjectFixtures;
+use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use App\Entity\{Project, User};
 use App\Repository\ProjectRepository;
 use App\Tests\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\EntityManagerInterface;
-use Liip\TestFixturesBundle\Test\FixturesTrait;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request};
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class ProjectsTest extends ApiTestCase
 {
-    use FixturesTrait;
-
     private HttpClientInterface $client;
     private EntityManagerInterface $em;
     private bool $fixturesHaveBeenLoaded = false;
@@ -29,10 +27,11 @@ final class ProjectsTest extends ApiTestCase
     {
         $kernel = self::bootKernel();
         $this->em = $kernel->getContainer()->get('doctrine')->getManager();
+        $databaseTool = $kernel->getContainer()->get(DatabaseToolCollection::class)->get();
         $this->client = JsonAuthenticatorTest::login();
 
         if (!$this->fixturesHaveBeenLoaded) {
-            $this->loadFixtures([
+            $databaseTool->loadFixtures([
                 // Because ProjectFixtures need UserFixtures, UserFixtures are
                 // automatically loaded.
                 ProjectFixtures::class
@@ -200,8 +199,8 @@ final class ProjectsTest extends ApiTestCase
         // not a 403 because otherwise an other user can see the id is valid.
         $this->client->request(Request::METHOD_GET, $url);
 
-        $this->assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
-        $this->assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
     }
 
     public function testUserProjectsAreAvailableAsAdmin(): void
@@ -224,16 +223,16 @@ final class ProjectsTest extends ApiTestCase
         // We are asking for a admin project so it must return a 403 response
         $response = $this->client->request(Request::METHOD_GET, $url);
 
-        $this->assertResponseIsSuccessful();
-        $this->assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
+        self::assertResponseIsSuccessful();
+        self::assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
         // Asserts that the returned JSON is a superset of this one
-        $this->assertJsonContains([
+        self::assertJsonContains([
             '@context' => '/contexts/Project',
             '@type' => 'https://schema.org/Project',
             'name' => ProjectFixtures::USER_PROJECT_NAME,
         ]);
-        $this->assertRegExp('~^/projects/\d+$~', $response->toArray()['@id']);
-        $this->assertMatchesResourceItemJsonSchema(Project::class);
+        self::assertMatchesRegularExpression('~^/projects/\d+$~', $response->toArray()['@id']);
+        self::assertMatchesResourceItemJsonSchema(Project::class);
     }
 
     /**

@@ -85,7 +85,7 @@ final class CreateProjectController extends AbstractController
             'json'
         );
 
-        $currentUser = $this->userRepository->find($userPayload->getId());
+        $currentUser = $this->userRepository->findOneBy(['username' => $userPayload->getUsername()]);
         $project->setUser($currentUser);
 
         $errors = $this->validator->validate($project);

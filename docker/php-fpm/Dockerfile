@@ -1,5 +1,5 @@
 # Reprise de l'image PHP 7.4 FastCGI Process Manager
-FROM php:7.4-fpm
+FROM php:8.0-fpm
 
 # Mise à jour de la liste des paquets et de leur version. Cette commande
 # n'installe rien du tout.

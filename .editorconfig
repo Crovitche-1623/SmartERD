@@ -1,0 +1,19 @@
+; top-most EditorConfig file
+root = true
+
+; Unix-style newlines
+[*]
+end_of_line = LF
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_size = 4
+
+[*.php]
+ij_visual_guides = 80, 120
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{twig, html, css, yml, yaml, js, json}]
+indent_size = 2

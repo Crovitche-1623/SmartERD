@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -27,9 +28,10 @@ final class SecurityController extends AbstractController
      */
     public function login(): JsonResponse
     {
+        /** @var  User  $currentUser */
         $currentUser = $this->getUser();
 
-        // It's only null if firewall hasn't been configured.
+        // It's null only if firewall hasn't been configured.
         if (!$currentUser) {
             $response = new JsonResponse([
                 'erreur' => 'Authentification nécessaire'
@@ -42,7 +44,7 @@ final class SecurityController extends AbstractController
 
         $token = $this->jwtEncoder->encode([
             'sub' => $currentUser->getId(),
-            'username' => $currentUser->getUsername(),
+            'username' => $currentUser->getUserIdentifier(),
             'roles' => $currentUser->getRoles(),
             'exp' => time() + 1800 // 30 minutes expiration
         ]);

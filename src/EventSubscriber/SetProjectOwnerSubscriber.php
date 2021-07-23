@@ -46,8 +46,7 @@ final class SetProjectOwnerSubscriber implements EventSubscriber
         // normally never null. This occurred only if the route isn't secured
         // or not behind the firewall.
         $currentUser = $this->security->getUser();
-        if (null === $entity->getUser()
-            && null !== $currentUser) {
+        if (null !== $currentUser && null === $entity->getUser()) {
             $entity->setUser($currentUser);
         }
     }

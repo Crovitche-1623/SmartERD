@@ -7,7 +7,7 @@ namespace App\Tests\Security;
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\UserFixtures;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
-use Liip\TestFixturesBundle\Test\FixturesTrait;
+use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -16,45 +16,49 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  */
 final class JsonAuthenticatorTest extends ApiTestCase
 {
-    use FixturesTrait;
-
     private bool $userFixturesHaveBeenLoaded = false;
-    private HttpClientInterface $client;
 
     /**
      * {@inheritDoc}
      */
     public function setUp(): void
     {
-        $this->loadUserFixturesIfNotAlreadyDone();
-        parent::setUp();
-    }
+        self::bootKernel();
+        $container = self::getContainer();
 
-    private function loadUserFixturesIfNotAlreadyDone(): void
-    {
+        $databaseTool = $container->get(DatabaseToolCollection::class)->get();
+
         if (!$this->userFixturesHaveBeenLoaded) {
-            $this->loadFixtures([UserFixtures::class]);
+            $databaseTool->loadFixtures([UserFixtures::class]);
             $this->userFixturesHaveBeenLoaded = true;
         }
+
+        parent::setUp();
     }
 
     public static function login(bool $asAdmin = true): HttpClientInterface
     {
-        $response = static::createClient()->request('POST', '/login', [
+        $client = self::createClient(
+            defaultOptions: ['base_uri' => 'http://localhost:8080/']
+        );
+
+        $response = $client->request('POST', '/login', [
             'json' => [
                 'username' => $asAdmin ? 'admin' : 'user',
                 'password' => UserFixtures::DEFAULT_USER_PASSWORD
             ]
         ]);
 
-        return static::createClient([], [
+
+        return self::createClient([], [
+            'base_uri' => 'http://localhost:8080/',
             'auth_bearer' => $response->toArray()['token'],
         ]);
     }
 
     public function testPrivatePageIsInaccessible(): void
     {
-        static::createClient()->request('GET', '/');
+        self::createClient()->request('GET', '/');
 
         self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNAUTHORIZED);
         self::assertResponseHasHeader('Content-Type', 'application/json');
@@ -63,7 +67,7 @@ final class JsonAuthenticatorTest extends ApiTestCase
 
     public function testLoginPageReturnTokenKey(): void
     {
-        $response = static::createClient()->request('POST', '/login', [
+        $response = self::createClient()->request('POST', '/login', [
             'json' => [
                 'username' => 'admin',
                 'password' => UserFixtures::DEFAULT_USER_PASSWORD
@@ -79,10 +83,11 @@ final class JsonAuthenticatorTest extends ApiTestCase
 
     public function testLoginPageReturnAValidToken(): void
     {
-        self::bootKernel();
-        $encoder = self::$container->get('lexik_jwt_authentication.encoder.lcobucci');
+        $container = self::getContainer();
 
-        $response = static::createClient()->request('POST', '/login', [
+        $encoder = $container->get('lexik_jwt_authentication.encoder');
+
+        $response = self::createClient()->request('POST', '/login', [
             'json' => [
                 'username' => 'admin',
                 'password' => UserFixtures::DEFAULT_USER_PASSWORD
@@ -92,7 +97,7 @@ final class JsonAuthenticatorTest extends ApiTestCase
         $jwtIsValid = true;
         try {
             $encoder->decode($response->toArray()['token']);
-        } catch (JWTDecodeFailureException $exception) {
+        } catch (JWTDecodeFailureException) {
             $jwtIsValid = false;
         }
 

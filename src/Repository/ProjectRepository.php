@@ -8,7 +8,7 @@ use ApiPlatform\Core\Bridge\Doctrine\Orm\Paginator;
 use App\Entity\Project;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -37,7 +37,7 @@ final class ProjectRepository extends ServiceEntityRepository
             FROM
                 App\Entity\Project p0
                 JOIN p0.user u1
-            WHERE 
+            WHERE
                 u1.username = :username AND
                 p0.name = :projectName
         ')
