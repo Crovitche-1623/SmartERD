@@ -19,7 +19,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 final class ProjectRepository extends ServiceEntityRepository
 {
-    public const ITEM_PER_PAGE = 10;
+    public const ITEM_PER_PAGE = 20;
 
     public function __construct(ManagerRegistry $registry)
     {
