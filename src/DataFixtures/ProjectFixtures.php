@@ -21,7 +21,8 @@ final class ProjectFixtures extends BaseFixture implements
      */
     public const TOTAL_PROJECTS_NUMBER = self::RANDOM_PROJECTS_NUMBER + 3;
     public const ADMIN_PROJECT_NAME = 'A simple admin project for testing purpose';
-    public const USER_PROJECT_NAME = 'A simple user project for testing purpose';
+    public const USER_PROJECT_NAME_1 = 'A simple user project for testing purpose';
+    public const USER_PROJECT_NAME_2 = 'Another simple user project for testing purpose';
 
     /**
      * {@inheritDoc}
@@ -53,13 +54,13 @@ final class ProjectFixtures extends BaseFixture implements
          */
         $user = $this->getSafeReference(User::class, UserFixtures::USER_USERNAME);
         $firstUserProject = (new Project)
-            ->setName(self::USER_PROJECT_NAME)
+            ->setName(self::USER_PROJECT_NAME_1)
             ->setUser($user);
         $manager->persist($firstUserProject);
         $this->addSafeReference($firstUserProject);
         unset($firstUserProject);
         $secondUserProject = (new Project)
-            ->setName('A second user project for testing purpose')
+            ->setName(self::USER_PROJECT_NAME_2)
             ->setUser($user);
         unset($user);
         $manager->persist($secondUserProject);

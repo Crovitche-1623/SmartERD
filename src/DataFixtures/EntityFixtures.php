@@ -28,7 +28,7 @@ final class EntityFixtures extends BaseFixture implements
      */
     protected function loadData(ObjectManager $manager): void
     {
-        $uniquePart = ProjectFixtures::USER_PROJECT_NAME.' '.UserFixtures::USER_USERNAME;
+        $uniquePart = ProjectFixtures::USER_PROJECT_NAME_1.' '.UserFixtures::USER_USERNAME;
         /**
          * @var  Project  $userProject
          */
