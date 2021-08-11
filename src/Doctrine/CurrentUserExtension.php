@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace App\Doctrine;
 
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\{QueryCollectionExtensionInterface, QueryItemExtensionInterface};
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGeneratorInterface;
-use Symfony\Component\Security\Core\Security;
 use App\Entity\Project;
 use Doctrine\ORM\QueryBuilder;
-use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\{
-    QueryCollectionExtensionInterface,
-    QueryItemExtensionInterface
-};
+use Symfony\Component\Security\Core\Security;
 
 /**
  * @see https://api-platform.com/docs/core/extensions/#custom-doctrine-orm-extension
@@ -23,12 +20,8 @@ final class CurrentUserExtension implements
     QueryCollectionExtensionInterface,
     QueryItemExtensionInterface
 {
-    private Security $security;
-
-    public function __construct(Security $security)
-    {
-        $this->security = $security;
-    }
+    public function __construct(private Security $security)
+    {}
 
     /**
      * Modify the DQL Query (used to create the collection) by adding a where

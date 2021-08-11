@@ -7,6 +7,7 @@ namespace App\Doctrine;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGeneratorInterface;
 use App\Entity\Entity;
+use App\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Security\Core\Security;
 
@@ -21,12 +22,8 @@ use Symfony\Component\Security\Core\Security;
 final class EntitiesBelongingToProjectOfCurrentUserExtension implements
     QueryItemExtensionInterface
 {
-    private Security $security;
-
-    public function __construct(Security $security)
-    {
-        $this->security = $security;
-    }
+    public function __construct(private Security $security)
+    {}
 
     /*
      * This method check if the resource class parameter does not match the
@@ -67,6 +64,7 @@ final class EntitiesBelongingToProjectOfCurrentUserExtension implements
             return;
         }
 
+        /** @var  User  $user */
         $rootAlias = $queryBuilder->getRootAliases()[0];
         $queryBuilder
             ->innerJoin(sprintf('%s.project', $rootAlias), 'p')

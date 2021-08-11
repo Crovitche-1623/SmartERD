@@ -17,23 +17,13 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 final class CreateProjectController extends AbstractController
 {
-    private ValidatorInterface $validator;
-    private SerializerInterface $serializer;
-    private EntityManagerInterface $em;
-    private UserRepository $userRepository;
-
     public function __construct(
-        ValidatorInterface $validator,
-        SerializerInterface $serializer,
-        EntityManagerInterface $em,
-        UserRepository $userRepository
+        private ValidatorInterface $validator,
+        private SerializerInterface $serializer,
+        private EntityManagerInterface $em,
+        private UserRepository $userRepository
     )
-    {
-        $this->validator = $validator;
-        $this->serializer = $serializer;
-        $this->em = $em;
-        $this->userRepository = $userRepository;
-    }
+    {}
 
     /**
      * TODO: Replace this file by using built-in POST method in API Platform.

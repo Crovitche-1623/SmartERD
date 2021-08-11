@@ -10,7 +10,6 @@ use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\Pure;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -60,7 +59,7 @@ class Project implements UniqueStringableInterface
 
     #[ORM\ManyToOne(User::class, fetch: 'EAGER', inversedBy: 'projects')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?UserInterface $user = null;
+    private ?User $user = null;
 
     // Warning : The nested entities collection are not paginated.
     // Note: This validation only apply when entities are persisted from a
@@ -104,12 +103,12 @@ class Project implements UniqueStringableInterface
         return $this;
     }
 
-    public function getUser(): ?UserInterface
+    public function getUser(): ?User
     {
         return $this->user;
     }
 
-    public function setUser(?UserInterface $user): self
+    public function setUser(?User $user): self
     {
         $this->user = $user;
 

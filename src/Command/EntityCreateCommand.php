@@ -7,7 +7,8 @@ namespace App\Command;
 use App\DataFixtures\{ProjectFixtures, UserFixtures};
 use App\Entity\{Entity, Project, User};
 use Doctrine\ORM\EntityManagerInterface;
-use Faker\{Factory,Generator};
+use Exception;
+use Faker\{Factory, Generator};
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputArgument, InputInterface};
 use Symfony\Component\Console\Output\OutputInterface;
@@ -16,12 +17,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 final class EntityCreateCommand extends Command
 {
     private Generator $faker;
-    private EntityManagerInterface $em;
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(private EntityManagerInterface $em)
     {
         $this->faker = Factory::create('fr_CH');
-        $this->em = $em;
 
         parent::__construct();
     }
@@ -88,7 +87,7 @@ final class EntityCreateCommand extends Command
         }
 
         while (null === $projectName && null === $project) {
-            $projectName = $io->ask('Project name', ProjectFixtures::USER_PROJECT_NAME);
+            $projectName = $io->ask('Project name', ProjectFixtures::USER_PROJECT_NAME_1);
             /**
              * @var  Project  $project
              */
@@ -119,7 +118,7 @@ final class EntityCreateCommand extends Command
                 );
                 $this->em->flush();
                 $io->success(sprintf('The entity %s has been created', $name));
-            } catch (\Exception $e) {
+            } catch (Exception) {
                 // $io->error($e->getMessage());
                 $io->error('An error occurred, please try again');
             }

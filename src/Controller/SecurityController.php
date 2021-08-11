@@ -13,12 +13,8 @@ use Symfony\Component\Routing\Annotation\Route;
 
 final class SecurityController extends AbstractController
 {
-    private JWTEncoderInterface $jwtEncoder;
-
-    public function __construct(JWTEncoderInterface $encoder)
-    {
-        $this->jwtEncoder = $encoder;
-    }
+    public function __construct(private JWTEncoderInterface $encoder)
+    {}
 
     /**
      * @Route(path = "/login", name = "login", methods = "POST")
@@ -42,7 +38,7 @@ final class SecurityController extends AbstractController
             ;
         }
 
-        $token = $this->jwtEncoder->encode([
+        $token = $this->encoder->encode([
             'sub' => $currentUser->getId(),
             'username' => $currentUser->getUserIdentifier(),
             'roles' => $currentUser->getRoles(),
