@@ -5,23 +5,21 @@ declare(strict_types=1);
 namespace App\Security\Voter;
 
 use App\Entity\Entity;
+use App\Entity\User;
+use JetBrains\PhpStorm\Pure;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 use Symfony\Component\Security\Core\Security;
-use Symfony\Component\Security\Core\User\UserInterface;
 
 final class EntityVoter extends Voter
 {
-    private Security $security;
-
-    public function __construct(Security $security)
-    {
-        $this->security = $security;
-    }
+    public function __construct(private Security $security)
+    {}
 
     /**
      * {@inheritDoc}
      */
+    #[Pure]
     protected function supports($attribute, $subject): bool
     {
         return in_array($attribute, ['ENTITY_VIEW'])
@@ -31,11 +29,15 @@ final class EntityVoter extends Voter
     /**
      * {@inheritDoc}
      *
+     * @param  string  $attribute
      * @param  Entity  $subject
+     * @param  TokenInterface  $token
+     *
+     * @return  bool
      */
     protected function voteOnAttribute(
-        $attribute,
-        $subject,
+        string $attribute,
+        mixed $subject,
         TokenInterface $token
     ): bool
     {
@@ -43,24 +45,28 @@ final class EntityVoter extends Voter
         // if the user is anonymous, do not grant access
         // Explication : When the user is not logged, the "getUser()" method
         //               return null. Null is not an instanceof UserInterface...
-        if (!$user instanceof UserInterface) {
+        if (!$user instanceof User) {
             return false;
         }
 
         switch ($attribute) {
             case 'ENTITY_VIEW':
                 return $this->canView($subject, $user);
-                break;
         }
 
         return false;
     }
 
-    private function canView(Entity $entity, UserInterface $currentUser): bool
+    private function canView(Entity $entity, User $currentUser): bool
     {
         // User can view the entity only if the entity belongs to a project he
         // own.
-        if ($entity->getProject()->getUser() === $currentUser) {
+        /**
+         * @var  User  $user
+         */
+        $user = $entity->getProject()->getUser();
+
+        if ($user->getId() === $currentUser->getId()) {
             return true;
         }
 
