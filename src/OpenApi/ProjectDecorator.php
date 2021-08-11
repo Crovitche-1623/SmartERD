@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace App\OpenApi;
 
 use ApiPlatform\Core\OpenApi\Factory\OpenApiFactoryInterface;
-use ApiPlatform\Core\OpenApi\OpenApi;
-use ApiPlatform\Core\OpenApi\Model\PathItem;
 use ApiPlatform\Core\OpenApi\Model\Operation;
+use ApiPlatform\Core\OpenApi\Model\PathItem;
 use ApiPlatform\Core\OpenApi\Model\RequestBody;
-use Symfony\Component\HttpFoundation\Response;
+use ApiPlatform\Core\OpenApi\OpenApi;
 use ArrayObject;
+use Symfony\Component\HttpFoundation\Response;
 
-final class CreateProjectDecorator implements OpenApiFactoryInterface
+final class ProjectDecorator implements OpenApiFactoryInterface
 {
     public function __construct(private OpenApiFactoryInterface $decorated)
     {}
@@ -26,6 +26,28 @@ final class CreateProjectDecorator implements OpenApiFactoryInterface
 
         $pathItem = new PathItem(
             ref: 'Projects',
+            get: new Operation(
+                operationId: 'getProjectItems',
+                tags: ['Project'],
+                responses: [
+                    Response::HTTP_OK => [
+                        'description' => 'Projects list of the user who call the request.',
+                        'content' => [
+                            'application/ld+json' => [
+                                'schema' => [
+                                    '$ref' => '#/components/schemas/Project.jsonld-project.read'
+                                ],
+                            ],
+                            'application/json' => [
+                                'schema' => [
+                                    '$ref' => '#/components/schemas/Project-project.read'
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                summary: 'List the projects of the user who call the request.'
+            ),
             post: new Operation(
                 operationId: 'postProjectItem',
                 tags: ['Project'],
