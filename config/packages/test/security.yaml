@@ -1,7 +1,7 @@
 # encode user password with md5 to speed up tests.
 # the tests passed from 1.87 minutes to 3.45 seconds when this changes were made.
 security:
-  encoders:
+  password_hashers:
     App\Entity\User:
       algorithm: md5
       encode_as_base64: false
