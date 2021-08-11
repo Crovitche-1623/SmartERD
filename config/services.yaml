@@ -38,13 +38,8 @@ services:
     decorates: 'api_platform.openapi.factory'
     autoconfigure: false
 
-  App\OpenApi\CreateProjectDecorator:
+  App\OpenApi\ProjectDecorator:
     decorates: 'api_platform.openapi.factory'
-    autoconfigure: false
-
-  App\Swagger\CurrentUserDecorator:
-    decorates: 'api_platform.swagger.normalizer.documentation'
-    arguments: [ '@App\Swagger\CurrentUserDecorator.inner' ]
     autoconfigure: false
 
   App\Doctrine\CurrentUserExtension:
