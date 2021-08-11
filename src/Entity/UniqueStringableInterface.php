@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\DataFixtures\BaseFixture;
+
 /**
  * For DataFixtures reference or cache purpose, this stringable interface ensure
  * the entity implement a "toUniqueString" method who MUST return an unique
  * string within his class. This string can be built using id or natural
  * identifier.
- * @see App\DataFixtures\BaseFixture -> addSafeReference
+ *
+ * @see  BaseFixture::addSafeReference()
  */
 interface UniqueStringableInterface
 {
