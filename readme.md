@@ -35,9 +35,9 @@ Execute these commands to run tests:
  1. Execute steps 1 & 2 from the [setup section](#Setup).
  2. Launch the setup command:
     ```
-    $   php bin/console app:setup --env=test
+    $   docker compose exec php bin/console app:setup --env=test
     ```
  3. Run the tests:
     ```
-    $   docker compose exec php vendor/bin/phpunit .
+    $   docker compose exec php vendor/bin/phpunit --testdox
     ```

@@ -7,6 +7,7 @@
 /var/
 /docker/nginx/logs
 /vendor/
+/bin/.phpunit/
 ###< symfony/framework-bundle ###
 
 ###> Remove the IDE config folder ###

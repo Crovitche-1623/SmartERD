@@ -42,13 +42,12 @@ final class JsonAuthenticatorTest extends ApiTestCase
             defaultOptions: ['base_uri' => 'http://localhost:8080/']
         );
 
-        $response = $client->request('POST', '/login', [
+        $response = $client->request('POST', '/login_check', [
             'json' => [
                 'username' => $asAdmin ? 'admin' : 'user',
                 'password' => UserFixtures::DEFAULT_USER_PASSWORD
             ]
         ]);
-
 
         return self::createClient([], [
             'base_uri' => 'http://localhost:8080/',
@@ -67,7 +66,7 @@ final class JsonAuthenticatorTest extends ApiTestCase
 
     public function testLoginPageReturnTokenKey(): void
     {
-        $response = self::createClient()->request('POST', '/login', [
+        $response = self::createClient()->request('POST', '/login_check', [
             'json' => [
                 'username' => 'admin',
                 'password' => UserFixtures::DEFAULT_USER_PASSWORD
@@ -87,7 +86,7 @@ final class JsonAuthenticatorTest extends ApiTestCase
 
         $encoder = $container->get('lexik_jwt_authentication.encoder');
 
-        $response = self::createClient()->request('POST', '/login', [
+        $response = self::createClient()->request('POST', '/login_check', [
             'json' => [
                 'username' => 'admin',
                 'password' => UserFixtures::DEFAULT_USER_PASSWORD

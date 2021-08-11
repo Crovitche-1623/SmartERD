@@ -6,11 +6,11 @@ namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\ProjectFixtures;
-use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use App\Entity\{Project, User};
 use App\Repository\ProjectRepository;
 use App\Tests\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\EntityManagerInterface;
+use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Component\HttpFoundation\{JsonResponse, Request};
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -216,7 +216,7 @@ final class ProjectsTest extends ApiTestCase
         // findIriBy allows to retrieve the IRI of an item by searching for some
         // of its properties.
         $url = $this->findIriBy(Project::class, [
-            'name' => ProjectFixtures::USER_PROJECT_NAME,
+            'name' => ProjectFixtures::USER_PROJECT_NAME_1,
             'user' => $user
         ]);
 
@@ -229,7 +229,7 @@ final class ProjectsTest extends ApiTestCase
         self::assertJsonContains([
             '@context' => '/contexts/Project',
             '@type' => 'https://schema.org/Project',
-            'name' => ProjectFixtures::USER_PROJECT_NAME,
+            'name' => ProjectFixtures::USER_PROJECT_NAME_1,
         ]);
         self::assertMatchesRegularExpression('~^/projects/\d+$~', $response->toArray()['@id']);
         self::assertMatchesResourceItemJsonSchema(Project::class);

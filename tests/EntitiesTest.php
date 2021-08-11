@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
-use App\Entity\Entity;
 use App\DataFixtures\{EntityFixtures, ProjectFixtures, UserFixtures};
+use App\Entity\Entity;
 use App\Entity\Project;
 use App\Tests\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\{EntityManagerInterface, NonUniqueResultException, NoResultException};
@@ -31,7 +31,7 @@ final class EntitiesTest extends ApiTestCase
         $kernel = self::bootKernel();
         $this->em = $kernel->getContainer()->get('doctrine')->getManager();
         $databaseTool = $kernel->getContainer()->get(DatabaseToolCollection::class)->get();
-        $this->client = JsonAuthenticatorTest::login($asAdmin = false);
+        $this->client = JsonAuthenticatorTest::login(asAdmin: false);
         $this->faker = Factory::create('fr_CH');
         if (!$this->fixturesHaveBeenLoaded) {
             $databaseTool->loadFixtures([
@@ -84,7 +84,7 @@ final class EntitiesTest extends ApiTestCase
             'name' => ProjectFixtures::ADMIN_PROJECT_NAME
         ]);
 
-        $this->client->request(Request::METHOD_POST, '/entities', [
+        $this->client->request('POST', '/entities', [
             'json' => [
                 'name' => 'LetMeInsertMySelfHere',
                 'project' => $adminProjectIri
@@ -102,20 +102,50 @@ final class EntitiesTest extends ApiTestCase
     // TODO: Check if the project of entity cannot be changed over time.
     //       (check serialization_group for PATCH)
 
+    public function testEntityProjectCannotChangeOverTime(): void
+    {
+        $aUserProjectIri = $this->findIriBy(Project::class, [
+           'name' => ProjectFixtures::USER_PROJECT_NAME_1
+        ]);
+
+        $response = $this->client->request('POST', '/entities', [
+            'json' => [
+                'name' => 'MyProjectCannotChangeOverTime',
+                'project' => $aUserProjectIri
+            ]
+        ]);
+
+        $iri = $response->toArray()['@id'];
+
+        $anotherUserProjectIri = $this->findIriBy(Project::class, [
+            'name' => ProjectFixtures::USER_PROJECT_NAME_2
+        ]);
+
+        $this->client->request('PATCH', $iri, [
+            'headers' => [
+              'content-type' => 'application/merge-patch+json',
+            ],
+            'json' => [
+                'project' => $anotherUserProjectIri,
+            ]
+        ]);
+
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_OK);
+        self::assertMatchesResourceItemJsonSchema(Entity::class);
+    }
+
     public function testMaxEntitiesPerProject(): void
     {
-        $this->client = JsonAuthenticatorTest::login($asAdmin = false);
-
         $this->purgeUserProject();
 
         $aUserProjectIri = $this->findIriBy(Project::class, [
-            'name' => ProjectFixtures::USER_PROJECT_NAME
+            'name' => ProjectFixtures::USER_PROJECT_NAME_1
         ]);
 
         for ($i = 0; $i < 30; ++$i) {
-            $this->client->request(Request::METHOD_POST, '/entities', [
+            $this->client->request('POST', '/entities', [
                 'json' => [
-                    'name' => $this->faker->unique()->text(50),
+                    'name' => $this->faker->unique()->word(),
                     'project' => $aUserProjectIri
                 ]
             ]);
@@ -132,7 +162,7 @@ final class EntitiesTest extends ApiTestCase
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
             'title' => 'An error occurred',
-            'detail' => "project: The maximum number of entities per project is 30."
+            'detail' => "project: The maximum number of Entity (30) for this Project has been reached."
         ]);
 
         // Revert the database to original state for the other tests.
@@ -161,9 +191,9 @@ final class EntitiesTest extends ApiTestCase
                         p0.name = :projectName
                 DQL)
                 ->setParameter('username', UserFixtures::USER_USERNAME, 'string')
-                ->setParameter('projectName', ProjectFixtures::USER_PROJECT_NAME, 'string')
+                ->setParameter('projectName', ProjectFixtures::USER_PROJECT_NAME_1, 'string')
                 ->getSingleScalarResult();
-        } catch (NoResultException $e) {
+        } catch (NoResultException) {
             return false;
         }
 
@@ -178,5 +208,28 @@ final class EntitiesTest extends ApiTestCase
             ->execute();
 
         return true;
+    }
+
+    public function testNameWithNotOnlyAlphabeticalCharacter(): void
+    {
+        $this->client = JsonAuthenticatorTest::login(asAdmin: true);
+
+        $adminProjectIri = $this->findIriBy(Project::class, [
+            'name' => ProjectFixtures::ADMIN_PROJECT_NAME
+        ]);
+
+        $this->client->request('POST', '/entities', [
+            'json' => [
+                'name' => 'Entité',
+                'project' => $adminProjectIri
+            ]
+        ]);
+
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
+        self::assertJsonContains([
+            'title' => 'An error occurred',
+            'detail' => "name: This value is not valid."
+        ]);
     }
 }
