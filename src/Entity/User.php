@@ -4,80 +4,49 @@ declare(strict_types = 1);
 
 namespace App\Entity;
 
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\UserRepository;
+use JetBrains\PhpStorm\Pure;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass = UserRepository::class)
- * @ORM\Table(name = "member") To avoid the reserved SQL word "user"
- * @Assert\EnableAutoMapping
- */
+#[ORM\Entity(UserRepository::class)]
+#[ORM\Table('member')]
+#[Assert\EnableAutoMapping]
 class User implements UserInterface, JWTUserInterface, UniqueStringableInterface, PasswordAuthenticatedUserInterface
 {
     use IdTrait;
 
-    /**
-     * @
-     * @ORM\Id
-     * @ORM\Column(type = "integer")
-     * @ORM\GeneratedValue
-     *
-     * ID can be nullable because the id is only received after the data has
-     * been persisted.
-     */
-    protected ?int $id = null;
-
-    /**
-     * @ORM\Column(length = 180, unique = true)
-     *
-     * @Assert\Length(min = 3)
-     */
+    #[ORM\Column(length: 180, unique: true)]
+    #[Assert\Length(min: 3)]
     private string $username = '';
 
-    /**
-     * @ORM\Column(type = "boolean")
-     */
+    #[ORM\Column(type: 'boolean')]
     private bool $isAdmin = false;
 
-    /**
-     * This value isn't stored in the database. The password is hashed when data
-     * are persisted.
-     *
-     * @Assert\NotBlank
-     * @Assert\Type("string")
-     * @Assert\Length(min = 6, max = 180)
-     * @Assert\NotCompromisedPassword
-     */
+    // This value isn't stored in the database. The password is hashed when data
+    // are persisted.
+    #[Assert\NotBlank]
+    #[Assert\Type('string')]
+    #[Assert\Length(min: 6, max: 180)]
+    #[Assert\NotCompromisedPassword]
     private ?string $plainPassword = null;
 
-    /**
-     * @ORM\Column(length = 180)
-     *
-     * @Assert\DisableAutoMapping
-     */
+    #[ORM\Column(length: 180)]
+    #[Assert\DisableAutoMapping]
     private string $hashedPassword = '';
 
-    /**
-     * @ORM\Column(length = 180, unique = true)
-     *
-     * @Assert\Email
-     */
+    #[ORM\Column(length: 180, unique: true)]
+    #[Assert\Email]
     private ?string $email = null;
 
-    /**
-     * @ORM\OneToMany(
-     *     targetEntity = Project::class,
-     *     mappedBy = "user",
-     *     orphanRemoval = true
-     * )
-     */
+    #[ORM\OneToMany('user', Project::class, orphanRemoval: true)]
     private Collection $projects;
 
+    #[Pure]
     public function __construct()
     {
         $this->projects = new ArrayCollection;
@@ -217,9 +186,6 @@ class User implements UserInterface, JWTUserInterface, UniqueStringableInterface
         return $this;
     }
 
-    /**
-     * @return  Collection|Project[]
-     */
     public function getProjects(): Collection
     {
         return $this->projects;
