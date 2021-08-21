@@ -46,12 +46,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     normalizationContext: ['groups' => 'project:read'],
 )]
-class Project implements UniqueStringableInterface
+class Project extends AbstractEntity implements UniqueStringableInterface
 {
-    use IdTrait;
-
-    const MAX_ENTITIES_PER_PROJECT = 30;
-
     #[ORM\Column(length: 50)]
     #[ApiProperty(iri: 'https://schema.org/name')]
     #[Groups(['project:create', 'project:read', 'project:details'])]

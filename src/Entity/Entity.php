@@ -32,10 +32,8 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => 'entity:read'],
 )]
 #[Assert\EnableAutoMapping]
-class Entity implements UniqueStringableInterface
+class Entity extends AbstractEntity implements UniqueStringableInterface
 {
-    use IdTrait;
-
     #[ORM\ManyToOne(
         targetEntity: Project::class,
         fetch: 'EAGER',

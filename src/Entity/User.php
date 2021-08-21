@@ -16,10 +16,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(UserRepository::class)]
 #[ORM\Table('member')]
 #[Assert\EnableAutoMapping]
-class User implements UserInterface, JWTUserInterface, UniqueStringableInterface, PasswordAuthenticatedUserInterface
+class User extends AbstractEntity implements UserInterface, JWTUserInterface, UniqueStringableInterface, PasswordAuthenticatedUserInterface
 {
-    use IdTrait;
-
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\Length(min: 3)]
     private string $username = '';
