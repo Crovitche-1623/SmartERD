@@ -220,6 +220,7 @@ final class EntitiesTest extends ApiTestCase
 
         $this->client->request('POST', '/entities', [
             'json' => [
+                /** Entité contains é which is an accentued character */
                 'name' => 'Entité',
                 'project' => $adminProjectIri
             ]
@@ -231,5 +232,42 @@ final class EntitiesTest extends ApiTestCase
             'title' => 'An error occurred',
             'detail' => "name: This value is not valid."
         ]);
+    }
+
+    public function testDeleteAnEntity(): void
+    {
+        $userProjectIri = $this->findIriBy(Project::class, [
+            'name' => ProjectFixtures::USER_PROJECT_NAME_1
+        ]);
+
+        // TODO: Delete a entity specified in fixture instead of creating a new
+        //       one here. This can ensure we can delete entities even if
+        //       creating new entities does not work using the api
+        $response = $this->client->request('POST', '/entities', [
+            'json' => [
+                'name' => 'Entity',
+                'project' => $userProjectIri
+            ]
+        ]);
+
+        $iri = $response->toArray()['@id'];
+
+        $this->client->request('DELETE', $iri);
+
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NO_CONTENT);
+    }
+
+    public function testDeleteEntityInAnotherUserProjectReturn404(): void
+    {
+        // We're logged as user by default and we will try to delete an entity
+        // in a admin project.
+
+        $adminEntityIri = $this->findIriBy(Entity::class, [
+            'name' => EntityFixtures::ADMIN_PROJECT_ENTITY_NAME
+        ]);
+
+        $this->client->request('DELETE', $adminEntityIri);
+
+        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
     }
 }

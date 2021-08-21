@@ -8,6 +8,7 @@ use ApiPlatform\Core\Annotation\{ApiProperty, ApiResource};
 use App\Repository\EntityRepository;
 use App\Validator as CustomAssert;
 use Doctrine\ORM\Mapping as ORM;
+use JetBrains\PhpStorm\Pure;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -26,6 +27,9 @@ use Symfony\Component\Validator\Constraints as Assert;
         'patch' => [
             'security' => "is_granted('ENTITY_VIEW', object)",
             'denormalization_context' => ['groups' => 'entity:edit']
+        ],
+        'delete' => [
+            'security' => "is_granted('ENTITY_VIEW', object)"
         ]
     ],
     denormalizationContext: ['groups' => 'entity:create'],
@@ -64,6 +68,7 @@ class Entity extends AbstractEntity implements UniqueStringableInterface
     /**
      * {@inheritDoc}
      */
+    #[Pure]
     public function toUniqueString(): string
     {
         return $this->getName().' '.$this->project->getName();

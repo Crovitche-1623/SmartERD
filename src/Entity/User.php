@@ -63,6 +63,7 @@ class User extends AbstractEntity implements UserInterface, JWTUserInterface, Un
     /**
      * {@inheritDoc}
      */
+    #[Pure]
     public function toUniqueString(): string
     {
         // Because this method is the identifier for UserInterface.

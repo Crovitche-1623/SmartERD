@@ -82,6 +82,7 @@ class Project extends AbstractEntity implements UniqueStringableInterface
     /**
      * {@inheritDoc}
      */
+    #[Pure]
     public function toUniqueString(): string
     {
         return $this->getName().' '.$this->user->getUsername();
