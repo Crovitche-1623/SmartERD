@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Validator;
 
+use Attribute;
 use Symfony\Component\Validator\Constraint;
 
 /**
  * @Annotation
  */
-final class MaxEntries extends Constraint
+#[Attribute] final class MaxEntries extends Constraint
 {
     public string $message = 'The maximum number of {{ parentName }} ({{ max }}) for this {{ childName }} has been reached.';
 
