@@ -5,13 +5,16 @@ declare(strict_types=1);
 namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
-use App\DataFixtures\ProjectFixtures;
-use App\Entity\{Project, User};
-use App\Repository\ProjectRepository;
+use App\{
+    DataFixtures\ProjectFixtures,
+    Entity\Project,
+    Entity\User,
+    Repository\ProjectRepository
+};
 use App\Tests\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\EntityManagerInterface;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
-use Symfony\Component\HttpFoundation\{JsonResponse, Request};
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class ProjectsTest extends ApiTestCase
@@ -47,11 +50,11 @@ final class ProjectsTest extends ApiTestCase
     {
         $name = 'Test Project';
 
-        $this->client->request(Request::METHOD_POST, '/projects', [
+        $this->client->request('POST', '/projects', [
             'json' => ['name' => $name]
         ]);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_CREATED);
+        self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
 
         // N.B: $this->json from AbstractController return the header:
         //          "content-type: application/json"
@@ -72,19 +75,15 @@ final class ProjectsTest extends ApiTestCase
     {
         $sameName = 'This name is going to be inserted two times !';
 
-        $this->client->request(Request::METHOD_POST, '/projects', [
-            'json' => [
-                'name' => $sameName
-            ]
+        $this->client->request('POST', '/projects', [
+            'json' => ['name' => $sameName]
         ]);
 
-        $this->client->request(Request::METHOD_POST, '/projects', [
-            'json' => [
-                'name' => $sameName
-            ]
+        $this->client->request('POST', '/projects', [
+            'json' => ['name' => $sameName]
         ]);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
             'title' => 'Validation Failed',
@@ -94,13 +93,13 @@ final class ProjectsTest extends ApiTestCase
 
     public function testCreateWithTooLongName(): void
     {
-        $this->client->request(Request::METHOD_POST, '/projects', [
+        $this->client->request('POST', '/projects', [
             'json' => [
                 'name' => str_repeat('a', 100)
             ]
         ]);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
             'title' => 'Validation Failed',
@@ -110,8 +109,8 @@ final class ProjectsTest extends ApiTestCase
 
     public function testUserCanAccessHisProjects(): void
     {
-        $this->client = JsonAuthenticatorTest::login($asAdmin = false);
-        $this->client->request(Request::METHOD_GET, '/projects');
+        $this->client = JsonAuthenticatorTest::login(asAdmin: false);
+        $this->client->request('GET', '/projects');
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('Content-Type', 'application/ld+json; charset=utf-8');
@@ -129,7 +128,7 @@ final class ProjectsTest extends ApiTestCase
 
     public function testAdminCanAccessAllProjects(): void
     {
-        $this->client->request(Request::METHOD_GET, '/projects');
+        $this->client->request('GET', '/projects');
 
         $projectsCountDQL = <<<DQL
             SELECT
@@ -169,7 +168,7 @@ final class ProjectsTest extends ApiTestCase
      */
     public function testOtherUserProjectAreNotAvailableAsUser(): void
     {
-        $this->client = JsonAuthenticatorTest::login($asAdmin = false);
+        $this->client = JsonAuthenticatorTest::login(asAdmin: false);
 
         /**
          * We have to retrieve the admin entity to find the project iri.
@@ -197,9 +196,9 @@ final class ProjectsTest extends ApiTestCase
 
         // We are asking for a admin project so it must return a 404 response
         // not a 403 because otherwise an other user can see the id is valid.
-        $this->client->request(Request::METHOD_GET, $url);
+        $this->client->request('GET', $url);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
     }
 
@@ -221,7 +220,7 @@ final class ProjectsTest extends ApiTestCase
         ]);
 
         // We are asking for a admin project so it must return a 403 response
-        $response = $this->client->request(Request::METHOD_GET, $url);
+        $response = $this->client->request('GET', $url);
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');

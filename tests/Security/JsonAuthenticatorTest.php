@@ -9,6 +9,7 @@ use App\DataFixtures\UserFixtures;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 /**
@@ -59,7 +60,7 @@ final class JsonAuthenticatorTest extends ApiTestCase
     {
         self::createClient()->request('GET', '/');
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNAUTHORIZED);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
         self::assertResponseHasHeader('Content-Type', 'application/json');
         self::assertJson('{"message" : "Authentification par nom et mot de passe nécessaire"}');
     }

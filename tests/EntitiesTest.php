@@ -6,14 +6,12 @@ namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\{EntityFixtures, ProjectFixtures, UserFixtures};
-use App\Entity\Entity;
-use App\Entity\Project;
+use App\Entity\{Entity, Project};
 use App\Tests\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\{EntityManagerInterface, NonUniqueResultException, NoResultException};
 use Faker\{Factory, Generator};
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class EntitiesTest extends ApiTestCase
@@ -70,7 +68,7 @@ final class EntitiesTest extends ApiTestCase
 
         $this->client->request(Request::METHOD_GET, $adminEntityIri);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
             'title' => 'An error occurred',
@@ -91,7 +89,7 @@ final class EntitiesTest extends ApiTestCase
             ]
         ]);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_BAD_REQUEST);
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
             'title' => 'An error occurred',
@@ -130,7 +128,7 @@ final class EntitiesTest extends ApiTestCase
             ]
         ]);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_OK);
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
         self::assertMatchesResourceItemJsonSchema(Entity::class);
     }
 
@@ -158,7 +156,7 @@ final class EntitiesTest extends ApiTestCase
             ]
         ]);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
             'title' => 'An error occurred',
@@ -226,7 +224,7 @@ final class EntitiesTest extends ApiTestCase
             ]
         ]);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
             'title' => 'An error occurred',
@@ -254,7 +252,7 @@ final class EntitiesTest extends ApiTestCase
 
         $this->client->request('DELETE', $iri);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NO_CONTENT);
+        self::assertResponseStatusCodeSame(Response::HTTP_NO_CONTENT);
     }
 
     public function testDeleteEntityInAnotherUserProjectReturn404(): void
@@ -268,6 +266,6 @@ final class EntitiesTest extends ApiTestCase
 
         $this->client->request('DELETE', $adminEntityIri);
 
-        self::assertResponseStatusCodeSame(JsonResponse::HTTP_NOT_FOUND);
+        self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
     }
 }
