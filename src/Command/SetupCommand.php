@@ -148,6 +148,12 @@ final class SetupCommand extends Command
 
         if (0 === $returnCode) {
             $io->success('The Doctrine Result cache has been cleared');
+            if (function_exists('apcu_clear_cache')) {
+                $io->warning('Clearing APC cache...');
+                apcu_clear_cache();
+
+                $io->success('APCu cache has been cleared');
+            }
         }
 
         return 0;

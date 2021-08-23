@@ -24,6 +24,9 @@ RUN apt-get install -y unzip libzip-dev libicu-dev zlib1g-dev libpq-dev libxml2-
     && docker-php-ext-install zip xml \
     && docker-php-ext-install opcache
 
+RUN pecl install apcu \
+    && docker-php-ext-enable apcu
+
 # Installation de Composer
 # -s rend l'installation silencieuse
 # -S fait apparaître les erreurs s'il y en a
