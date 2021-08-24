@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\Project;
-use App\Repository\UserRepository;
+use App\{Entity\Project, Repository\UserRepository};
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpClient\Exception\InvalidArgumentException;
-use Symfony\Component\HttpFoundation\{JsonResponse, Request};
+use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Serializer\SerializerInterface;
@@ -30,52 +29,46 @@ final class CreateProjectController extends AbstractController
      *       The previous purpose of this file was to check if the project owner
      *       & the current user are the same. An additional purpose was to
      *       return application/problem+json content-type.
-     *
-     * @Route(
-     *     path = "/projects",
-     *     name = "api_projects_post_collection",
-     *     methods = "POST"
-     * )
-     * @param  Request  $request
-     *
-     * @return  JsonResponse
      */
+    #[Route(
+        path: '/projects',
+        name: 'api_projects_post_collection',
+        methods: 'POST'
+    )]
     public function __invoke(Request $request): JsonResponse
     {
         // TODO: Configurer le format de retour avec un Header Accept: <format>
         //       ou plus simplement à l'aide de l'url
         //       /projects.json retournerait du JSON & /projects.xml du XML
-
-        if (!$request->headers->get('content-type') === 'application/json') {
+        if ($request->headers->get('content-type') !== 'application/json') {
             throw new InvalidArgumentException(
                 'The Content-Type of the request should be application/json',
-                JsonResponse::HTTP_BAD_REQUEST
+                Response::HTTP_BAD_REQUEST
             );
         }
 
-        /**
-         * Because the entity is recreated using JWT Payload, it is not the
-         * "real" user yet. It will be retrieved afterwards.
-         */
+        // Because the entity is recreated using JWT Payload, it is not the
+        // "real" user yet. It will be retrieved afterwards.
         $userPayload = $this->getUser();
 
         if (null === $userPayload) {
             throw new AuthenticationException(
                 'Authentication required',
-                JsonResponse::HTTP_UNAUTHORIZED
+                Response::HTTP_UNAUTHORIZED
             );
         }
 
-        /**
-         * @var  Project  $project
-         */
+        /** @var  Project  $project */
         $project = $this->serializer->deserialize(
             $request->getContent(),
             Project::class,
             'json'
         );
 
-        $currentUser = $this->userRepository->findOneBy(['username' => $userPayload->getUsername()]);
+        $currentUser = $this->userRepository->findOneBy([
+            'username' => $userPayload->getUsername()
+        ]);
+
         $project->setUser($currentUser);
 
         $errors = $this->validator->validate($project);
@@ -85,7 +78,7 @@ final class CreateProjectController extends AbstractController
         //       sequentially, @see :
         // https://symfony.com/doc/master/reference/constraints/Sequentially.html
         if (count($errors) > 0) {
-            return $this->json($errors, JsonResponse::HTTP_BAD_REQUEST, [
+            return $this->json($errors, Response::HTTP_BAD_REQUEST, [
                 'content-type' => 'application/problem+json; charset=utf-8'
             ]);
         }
@@ -95,7 +88,7 @@ final class CreateProjectController extends AbstractController
 
         return $this->json(
             $project,
-            JsonResponse::HTTP_CREATED,
+            Response::HTTP_CREATED,
             [],
             ['groups' => 'project:read']
         );

@@ -37,9 +37,7 @@ final class ProjectFixtures extends BaseFixture implements
      */
     public function loadData(ObjectManager $manager): void
     {
-        /**
-         * @var  User  $admin
-         */
+        /** @var  User  $admin */
         $admin = $this->getSafeReference(User::class, UserFixtures::ADMIN_USERNAME);
         $firstAdminProject = (new Project)
             ->setName(self::ADMIN_PROJECT_NAME)
@@ -49,9 +47,7 @@ final class ProjectFixtures extends BaseFixture implements
         $this->addSafeReference($firstAdminProject);
         unset($firstAdminProject);
 
-        /**
-         * @var  User  $user
-         */
+        /** @var  User  $user */
         $user = $this->getSafeReference(User::class, UserFixtures::USER_USERNAME);
         $firstUserProject = (new Project)
             ->setName(self::USER_PROJECT_NAME_1)
@@ -59,6 +55,7 @@ final class ProjectFixtures extends BaseFixture implements
         $manager->persist($firstUserProject);
         $this->addSafeReference($firstUserProject);
         unset($firstUserProject);
+
         $secondUserProject = (new Project)
             ->setName(self::USER_PROJECT_NAME_2)
             ->setUser($user);
@@ -78,9 +75,7 @@ final class ProjectFixtures extends BaseFixture implements
                 UserFixtures::USERS_NUMBER
             );
 
-            /**
-             * @var  User  $creator
-             */
+            /** @var  User  $creator */
             $creator = $this->getReference('App\\Entity\\User_' . $userNumber);
             unset($userNumber);
 

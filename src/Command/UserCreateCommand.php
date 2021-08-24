@@ -7,7 +7,6 @@ namespace App\Command;
 use App\DataFixtures\UserFixtures;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Faker\{Factory, Generator};
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputArgument, InputInterface};
@@ -97,7 +96,7 @@ final class UserCreateCommand extends Command
                 );
                 $this->em->flush();
                 $io->success(sprintf('The user %s has been created', $username));
-            } catch (Exception) {
+            } catch (\Exception) {
                 // $io->error($e->getMessage());
                 $io->error('An error occurred, please try again');
             }

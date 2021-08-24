@@ -27,11 +27,6 @@ final class CurrentUserExtension implements
      * Modify the DQL Query (used to create the collection) by adding a where
      * condition to check if the owner is the current user or has the
      * "ROLE_ADMIN" role.
-     *
-     * @param  QueryBuilder  $queryBuilder
-     * @param  QueryNameGeneratorInterface  $queryNameGenerator
-     * @param  string  $resourceClass
-     * @param  string|null  $operationName
      */
     public function applyToCollection(
         QueryBuilder $queryBuilder,
@@ -47,13 +42,6 @@ final class CurrentUserExtension implements
      * Modify the DQL Query (used to create the item) by adding a where
      * condition to check if the owner is the current user or has the
      * "ROLE_ADMIN" role.
-     *
-     * @param  QueryBuilder  $queryBuilder
-     * @param  QueryNameGeneratorInterface  $queryNameGenerator
-     * @param  string  $resourceClass
-     * @param  array  $identifiers
-     * @param  string|null  $operationName
-     * @param  array  $context
      */
     public function applyToItem(
         QueryBuilder $queryBuilder,

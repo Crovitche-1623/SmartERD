@@ -10,9 +10,7 @@ use Symfony\Component\Security\Core\Security;
 
 final class AddSubFieldOnJWTPayloadListener
 {
-    public function __construct(
-        private Security $security,
-    )
+    public function __construct(private Security $security)
     {}
 
     public function onJWTCreated(JWTCreatedEvent $event): void

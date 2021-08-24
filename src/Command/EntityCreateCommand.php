@@ -51,11 +51,8 @@ final class EntityCreateCommand extends Command
         $io->title('SmartERD - Entity creator assistant');
         $io->text('Answer all the questions or press <return> to choose the [<comment>default value</comment>]');
 
-        /**
-         * TODO: Add validator to questions when Reusable sets of constraints
-         *       will be available in Symfony 5.1
-         */
-
+        // TODO: Add validator to questions when Reusable sets of constraints
+        //       will be available in Symfony 5.1
         $ownerUsername = $input->getArgument('ownerUsername');
 
         /**

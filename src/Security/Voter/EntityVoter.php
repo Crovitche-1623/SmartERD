@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Security\Voter;
 
-use App\Entity\Entity;
-use App\Entity\User;
+use App\Entity\{Entity, User};
 use JetBrains\PhpStorm\Pure;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;

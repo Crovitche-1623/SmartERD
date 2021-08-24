@@ -1,7 +1,4 @@
 {
-    "api-platform/api-pack": {
-        "version": "v1.2.1"
-    },
     "api-platform/core": {
         "version": "2.5",
         "recipe": {
@@ -15,6 +12,9 @@
             "config/routes/api_platform.yaml",
             "src/Entity/.gitignore"
         ]
+    },
+    "composer/package-versions-deprecated": {
+        "version": "1.11.99.2"
     },
     "doctrine/annotations": {
         "version": "1.0",
@@ -433,9 +433,6 @@
             "./config/packages/test/monolog.yaml"
         ]
     },
-    "symfony/orm-pack": {
-        "version": "v1.0.8"
-    },
     "symfony/password-hasher": {
         "version": "v5.3.3"
     },
@@ -528,9 +525,6 @@
     "symfony/serializer": {
         "version": "v5.0.6"
     },
-    "symfony/serializer-pack": {
-        "version": "v1.0.2"
-    },
     "symfony/service-contracts": {
         "version": "v2.0.1"
     },
@@ -539,9 +533,6 @@
     },
     "symfony/string": {
         "version": "v5.1.11"
-    },
-    "symfony/test-pack": {
-        "version": "v1.0.6"
     },
     "symfony/translation-contracts": {
         "version": "v2.0.1"

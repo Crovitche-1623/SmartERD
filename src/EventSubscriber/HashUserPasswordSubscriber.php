@@ -11,28 +11,23 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Doctrine\ORM\Events;
 
 /**
- * This subscriber is responsible of hashing the password in the case where
+ * This subscriber is responsible for hashing the password in the case where
  * user->getPlainPassword() isn't null. After the password has been hashed, the
  * method $user->eraseCredentials() is called and the plainPassword is removed.
  */
 final class HashUserPasswordSubscriber implements EventSubscriber
 {
-    private UserPasswordHasherInterface $passwordHasher;
-
-    public function __construct(UserPasswordHasherInterface $passwordEncoder)
-    {
-        $this->passwordHasher = $passwordEncoder;
-    }
+    public function __construct(
+        private UserPasswordHasherInterface $passwordHasher
+    )
+    {}
 
     /**
      * {@inheritDoc}
      */
     public function getSubscribedEvents(): array
     {
-        return [
-            Events::prePersist,
-            Events::preUpdate
-        ];
+        return [Events::prePersist, Events::preUpdate];
     }
 
     public function prePersist(LifecycleEventArgs $args): void

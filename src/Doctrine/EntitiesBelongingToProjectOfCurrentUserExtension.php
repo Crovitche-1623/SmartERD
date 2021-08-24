@@ -6,14 +6,13 @@ namespace App\Doctrine;
 
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Extension\QueryItemExtensionInterface;
 use ApiPlatform\Core\Bridge\Doctrine\Orm\Util\QueryNameGeneratorInterface;
-use App\Entity\Entity;
-use App\Entity\User;
+use App\Entity\{Entity, User};
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\Security\Core\Security;
 
 /**
  * When the user do a /entities/{id}, a where condition should be applied to the
- * query to avoid 403 response. An user should not be aware the entity he want
+ * query to avoid 403 response. A user should not be aware the entity he wants
  * belongs to another project.
  * This also applies when creating a new Entity using POST /entities. If the
  * project iri (passed in request body) belong to another user, user won't know
@@ -31,7 +30,7 @@ final class EntitiesBelongingToProjectOfCurrentUserExtension implements
      * if the user is not logged.
      * If one of theses above conditions is true, the rest of the method is not
      * executed.
-     * Then it add a where condition to the query to have only the projects of
+     * Then it adds a where condition to the query to have only the projects of
      * current user.
      */
     public function applyToItem(
@@ -51,12 +50,6 @@ final class EntitiesBelongingToProjectOfCurrentUserExtension implements
         string $resourceClass
     ): void
     {
-        // TODO: Create functional tests and check :
-        //       1. User can access an entity
-        //       2. User who request an entity belonging to a project he does
-        //          not own return 404 response.
-        //       3. Admin can access /entities
-        //       4. Admin can access all /entities/{id}
         if (Entity::class !== $resourceClass ||
             $this->security->isGranted('ROLE_ADMIN') ||
             null === $user = $this->security->getUser()

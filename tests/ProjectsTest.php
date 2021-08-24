@@ -5,12 +5,9 @@ declare(strict_types=1);
 namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
-use App\{
-    DataFixtures\ProjectFixtures,
-    Entity\Project,
-    Entity\User,
-    Repository\ProjectRepository
-};
+use App\DataFixtures\ProjectFixtures;
+use App\Repository\ProjectRepository;
+use App\Entity\{Project, User};
 use App\Tests\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\EntityManagerInterface;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;

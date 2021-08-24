@@ -10,9 +10,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 final class TestController extends AbstractController
 {
-    /**
-     * @Route(path = "/phpinfo", name = "phpinfo", methods = "GET")
-     */
+    #[Route(path: '/phpinfo', name: 'phpinfo', methods: 'GET')]
     public function phpInfo(): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');

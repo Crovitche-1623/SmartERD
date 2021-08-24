@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Validator;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\{EntityManagerInterface, NoResultException};
 use ReflectionClass;
-use Symfony\Component\Validator\Constraint;
-use Symfony\Component\Validator\ConstraintValidator;
+use Symfony\Component\{Validator\Constraint, Validator\ConstraintValidator};
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 final class MaxEntriesValidator extends ConstraintValidator

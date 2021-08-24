@@ -46,7 +46,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     normalizationContext: ['groups' => 'project:read'],
 )]
-class Project extends AbstractEntity implements UniqueStringableInterface
+class Project extends AbstractEntity
 {
     #[ORM\Column(length: 50)]
     #[ApiProperty(iri: 'https://schema.org/name')]
@@ -82,7 +82,6 @@ class Project extends AbstractEntity implements UniqueStringableInterface
     /**
      * {@inheritDoc}
      */
-    #[Pure]
     public function toUniqueString(): string
     {
         return $this->getName().' '.$this->user->getUsername();

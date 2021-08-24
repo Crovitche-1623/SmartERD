@@ -6,23 +6,25 @@ namespace App\Entity;
 
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\Pure;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Core\User\{PasswordAuthenticatedUserInterface, UserInterface};
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(UserRepository::class)]
-#[ORM\Table('member')]
+#[ORM\Entity(UserRepository::class), ORM\Table('member')]
 #[Assert\EnableAutoMapping]
-class User extends AbstractEntity implements UserInterface, JWTUserInterface, UniqueStringableInterface, PasswordAuthenticatedUserInterface
+class User extends AbstractEntity implements
+    UserInterface,
+    JWTUserInterface,
+    PasswordAuthenticatedUserInterface
 {
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\Length(min: 3)]
     private string $username = '';
 
-    #[ORM\Column(type: 'boolean')]
+    #[ORM\Column(type: Types::BOOLEAN)]
     private bool $isAdmin = false;
 
     // This value isn't stored in the database. The password is hashed when data

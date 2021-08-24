@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use App\Entity\UniqueStringableInterface;
+use App\Entity\AbstractEntity;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\{Factory, Generator};
-use InvalidArgumentException, ReflectionClass, ReflectionException;
 
 abstract class BaseFixture extends Fixture
 {
@@ -53,15 +52,10 @@ abstract class BaseFixture extends Fixture
      * collisions, a "toUniqueString" method MUST return something unique (which
      * identify the data). The goal of ths function is to get reference by
      * giving a simple unique which identify the data.
-     *
-     * @param  UniqueStringableInterface  $entity
-     *
-     * @throws  ReflectionException  In the case where a bad parameter would be
-     *                               sent to the ReflectionClass
      */
-    public function addSafeReference(UniqueStringableInterface $entity): void
+    public function addSafeReference(AbstractEntity $entity): void
     {
-        $function = new ReflectionClass(get_class($entity));
+        $function = new \ReflectionClass(get_class($entity));
 
         // TO DEBUG, UNCOMMENT THE FOLLOWING LINE :
         // print_r($function->getShortName().'_'.$entity->toUniqueString().PHP_EOL);
@@ -81,11 +75,8 @@ abstract class BaseFixture extends Fixture
      *                              created with "toUniqueString()" method.
      * @return  object  The entity (reference) you are searching.
      *
-     * @throws  ReflectionException  In the case where a bad parameter would be
-     *                               sent to the ReflectionClass
-     * @throws  InvalidArgumentException  In the case where the class doesn't
-     *                                    implement the
-     *                                    UniqueStringableInterface
+     * @throws  \InvalidArgumentException  In the case where the class doesn't
+     *                                     extend the AbstractEntity class
      */
     public function getSafeReference(
         string $className,
@@ -93,16 +84,16 @@ abstract class BaseFixture extends Fixture
     ): object
     {
         $entity = new $className;
-        if (!$entity instanceof UniqueStringableInterface) {
-            throw new InvalidArgumentException(
+        if (!$entity instanceof AbstractEntity) {
+            throw new \InvalidArgumentException(
                 sprintf(
-                    "The entity %s must implement the %s.",
+                    "The entity %s must extend the %s.",
                     get_class($entity),
-                    UniqueStringableInterface::class
+                    AbstractEntity::class
                 )
             );
         }
-        $function = new ReflectionClass(get_class($entity));
+        $function = new \ReflectionClass(get_class($entity));
         unset($entity);
 
         // TO DEBUG, UNCOMMENT THE FOLLOWING LINE :

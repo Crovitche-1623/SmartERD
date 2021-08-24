@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\OpenApi;
 
-use ApiPlatform\Core\OpenApi\Factory\OpenApiFactoryInterface;
-use ApiPlatform\Core\OpenApi\Model\Operation;
-use ApiPlatform\Core\OpenApi\Model\PathItem;
-use ApiPlatform\Core\OpenApi\Model\RequestBody;
-use ApiPlatform\Core\OpenApi\OpenApi;
+use ApiPlatform\Core\OpenApi\{
+    Factory\OpenApiFactoryInterface,
+    Model\Operation,
+    Model\PathItem,
+    Model\RequestBody,
+    OpenApi
+};
 use ArrayObject;
 use Symfony\Component\HttpFoundation\Response;
 

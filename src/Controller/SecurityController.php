@@ -8,7 +8,7 @@ use App\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\{JsonResponse, Response};
 use Symfony\Component\Routing\Annotation\Route;
 
 final class SecurityController extends AbstractController
@@ -17,11 +17,9 @@ final class SecurityController extends AbstractController
     {}
 
     /**
-     * @Route(path = "/login", name = "login", methods = "POST")
-     *
-     * @return  JsonResponse
-     * @throws  JWTEncodeFailureException  if the JWT cannot be encoded
+     * @throws JWTEncodeFailureException
      */
+    #[Route(path: '/login', name: 'login', methods: 'POST')]
     public function login(): JsonResponse
     {
         /** @var  User  $currentUser */
@@ -34,7 +32,7 @@ final class SecurityController extends AbstractController
             ]);
             return $response
                 ->setEncodingOptions(JSON_UNESCAPED_UNICODE)
-                ->setStatusCode(JsonResponse::HTTP_BAD_REQUEST)
+                ->setStatusCode(Response::HTTP_BAD_REQUEST)
             ;
         }
 

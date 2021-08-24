@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use App\Entity\Entity;
-use App\Entity\Project;
+use App\Entity\{Entity, Project};
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 

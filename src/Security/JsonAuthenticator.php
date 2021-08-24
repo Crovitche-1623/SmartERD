@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Security;
 
 use App\Repository\UserRepository;
-use Symfony\Component\HttpFoundation\{JsonResponse, Request};
+use JsonException;
+use Symfony\Component\HttpFoundation\{JsonResponse, Request, Response};
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\{AuthenticationException, UserNotFoundException};
 use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
@@ -44,6 +45,8 @@ final class JsonAuthenticator extends AbstractAuthenticator implements Authentic
 
     /**
      * {@inheritDoc}
+     *
+     * @throws JsonException
      */
     public function supports(Request $request): bool
     {
@@ -106,7 +109,7 @@ final class JsonAuthenticator extends AbstractAuthenticator implements Authentic
             // $this->translator->trans($exception->getMessageKey(), $exception->getMessageData())
         ];
 
-        return new JsonResponse($data, JsonResponse::HTTP_FORBIDDEN);
+        return new JsonResponse($data, Response::HTTP_FORBIDDEN);
     }
 
     /**

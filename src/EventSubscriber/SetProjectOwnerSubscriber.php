@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
-use App\Entity\Project;
+use App\Entity\{Project, User};
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ORM\Event\LifecycleEventArgs;
-use Doctrine\ORM\Events;
+use Doctrine\ORM\{Event\LifecycleEventArgs, Events};
 use Symfony\Component\Security\Core\Security;
 
 final class SetProjectOwnerSubscriber implements EventSubscriber
@@ -20,9 +19,7 @@ final class SetProjectOwnerSubscriber implements EventSubscriber
      */
     public function getSubscribedEvents(): array
     {
-        return [
-            Events::prePersist
-        ];
+        return [Events::prePersist];
     }
 
     public function prePersist(LifecycleEventArgs $args): void
@@ -41,6 +38,7 @@ final class SetProjectOwnerSubscriber implements EventSubscriber
         // The second condition should never be true because the current user is
         // normally never null. This occurred only if the route isn't secured
         // or not behind the firewall.
+        /** @var  User  $currentUser */
         $currentUser = $this->security->getUser();
         if (null !== $currentUser && null === $entity->getUser()) {
             $entity->setUser($currentUser);

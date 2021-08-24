@@ -6,7 +6,6 @@ namespace App\DataFixtures;
 
 use App\Entity\User;
 use Doctrine\Persistence\ObjectManager;
-use ReflectionException;
 
 final class UserFixtures extends BaseFixture
 {
@@ -17,8 +16,6 @@ final class UserFixtures extends BaseFixture
 
     /**
      * {@inheritDoc}
-     *
-     * @throws ReflectionException
      */
     public function loadData(ObjectManager $manager): void
     {
