@@ -6,6 +6,7 @@ namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\{ApiProperty, ApiResource};
 use App\Repository\ProjectRepository;
+use App\Validator as CustomAssert;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\Pure;
@@ -13,7 +14,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(ProjectRepository::class)]
+#[ORM\Entity(ProjectRepository::class), ORM\Table('SERD_Projects')]
 #[ORM\UniqueConstraint('uniq___project___name__user', ['name', 'user_id'])]
 #[Assert\EnableAutoMapping]
 #[UniqueEntity(
@@ -48,6 +49,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class Project extends AbstractEntity
 {
+    public const MAX_ENTITIES_PER_PROJECT = 30;
+
     #[ORM\Column(length: 50)]
     #[ApiProperty(iri: 'https://schema.org/name')]
     #[Groups(['project:create', 'project:read', 'project:details'])]
@@ -55,15 +58,15 @@ class Project extends AbstractEntity
 
     #[ORM\ManyToOne(User::class, fetch: 'EAGER', inversedBy: 'projects')]
     #[ORM\JoinColumn(nullable: false)]
+    #[CustomAssert\MaxEntries(User::MAX_PROJECTS_PER_USER)]
     private ?User $user = null;
 
-    // Warning : The nested entities collection are not paginated.
     // Note: This validation only apply when entities are persisted from a
     //       project.
     #[ORM\OneToMany("project", Entity::class, orphanRemoval: true)]
     #[Groups('project:details')]
     #[Assert\Count(
-        max: 30,
+        max: self::MAX_ENTITIES_PER_PROJECT,
         maxMessage: 'You cannot have more than {{ limit }} entities'
     )]
     private Collection $entities;

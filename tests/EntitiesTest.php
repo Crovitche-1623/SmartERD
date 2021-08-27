@@ -140,7 +140,7 @@ final class EntitiesTest extends ApiTestCase
             'name' => ProjectFixtures::USER_PROJECT_NAME_1
         ]);
 
-        for ($i = 0; $i < 30; ++$i) {
+        for ($i = 0; $i < Project::MAX_ENTITIES_PER_PROJECT; ++$i) {
             $this->client->request('POST', '/entities', [
                 'json' => [
                     'name' => $this->faker->unique()->word(),

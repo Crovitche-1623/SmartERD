@@ -12,7 +12,7 @@ use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(EntityRepository::class)]
+#[ORM\Entity(EntityRepository::class), ORM\Table('SERD_Entities')]
 #[ORM\UniqueConstraint('uniq___entity___name__project', ['name', 'project_id'])]
 #[UniqueEntity(
     fields: ['project', 'name'],
@@ -44,7 +44,7 @@ class Entity extends AbstractEntity
     )]
     #[ORM\JoinColumn(nullable: false)]
     #[Groups(['entity:create'])]
-    #[CustomAssert\MaxEntries(30)]
+    #[CustomAssert\MaxEntries(Project::MAX_ENTITIES_PER_PROJECT)]
     private ?Project $project = null;
 
     #[ORM\Column(length: 180)]
@@ -53,15 +53,13 @@ class Entity extends AbstractEntity
         'project:details',
         'entity:create', 'entity:read', 'entity:edit'
     ])]
-    #[Assert\Regex(
-        pattern: '/^[a-z]+$/i',
-        htmlPattern: '^[a-zA-Z]+$'
-    )]
+    #[Assert\Regex('/^[a-z]+$/i', htmlPattern: '^[a-zA-Z]+$')]
     private ?string $name = null;
 
+    #[Pure]
     public function __toString(): string
     {
-        return $this->name;
+        return (string) $this->getName();
     }
 
     /**

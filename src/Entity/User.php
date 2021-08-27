@@ -13,13 +13,15 @@ use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\{PasswordAuthenticatedUserInterface, UserInterface};
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(UserRepository::class), ORM\Table('member')]
+#[ORM\Entity(UserRepository::class), ORM\Table('SERD_Members')]
 #[Assert\EnableAutoMapping]
 class User extends AbstractEntity implements
     UserInterface,
     JWTUserInterface,
     PasswordAuthenticatedUserInterface
 {
+    public const MAX_PROJECTS_PER_USER = 5;
+
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\Length(min: 3)]
     private string $username = '';
@@ -57,6 +59,7 @@ class User extends AbstractEntity implements
         return $this->username;
     }
 
+    #[Pure]
     public function getUserIdentifier(): string
     {
         return $this->toUniqueString();
@@ -72,11 +75,6 @@ class User extends AbstractEntity implements
         return $this->getUsername();
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see  UserInterface
-     */
     public function getUsername(): string
     {
         return $this->username;

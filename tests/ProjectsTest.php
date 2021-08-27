@@ -104,6 +104,18 @@ final class ProjectsTest extends ApiTestCase
         ]);
     }
 
+    // TODO: Finish
+    public function testCreateToMuchProject(): void
+    {
+        for ($i = 0; $i < User::MAX_PROJECTS_PER_USER; ++$i) {
+            $this->client->request('POST', '/projects', [
+                'json' => [
+                    'name' => 'project'. $i
+                ]
+            ]);
+        }
+    }
+
     public function testUserCanAccessHisProjects(): void
     {
         $this->client = JsonAuthenticatorTest::login(asAdmin: false);

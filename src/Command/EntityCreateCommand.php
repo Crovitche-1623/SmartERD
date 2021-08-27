@@ -7,7 +7,6 @@ namespace App\Command;
 use App\DataFixtures\{ProjectFixtures, UserFixtures};
 use App\Entity\{Entity, Project, User};
 use Doctrine\ORM\EntityManagerInterface;
-use Exception;
 use Faker\{Factory, Generator};
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{InputArgument, InputInterface};
@@ -55,9 +54,7 @@ final class EntityCreateCommand extends Command
         //       will be available in Symfony 5.1
         $ownerUsername = $input->getArgument('ownerUsername');
 
-        /**
-         * @var  User  $owner
-         */
+        /** @var  User  $owner */
         $owner = $this->em->getRepository(User::class)->findOneBy([
             'username' => $ownerUsername
         ]);
@@ -74,9 +71,7 @@ final class EntityCreateCommand extends Command
         $project = null;
 
         // TODO: Check the 2 following condition and correct them. Same for other file
-        /**
-         * @var  Project  $project
-         */
+        /** @var  Project  $project */
         if (null !== $projectName) {
             $project = $this->em
                 ->getRepository(Project::class)
@@ -115,7 +110,7 @@ final class EntityCreateCommand extends Command
                 );
                 $this->em->flush();
                 $io->success(sprintf('The entity %s has been created', $name));
-            } catch (Exception) {
+            } catch (\Exception) {
                 // $io->error($e->getMessage());
                 $io->error('An error occurred, please try again');
             }
@@ -123,6 +118,6 @@ final class EntityCreateCommand extends Command
             $io->error('Relaunch this command to try again');
         }
 
-        return 0;
+        return Command::SUCCESS;
     }
 }
