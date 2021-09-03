@@ -51,3 +51,7 @@ services:
   App\Doctrine\EntitiesBelongingToProjectOfCurrentUserExtension:
     tags:
       - { name: api_platform.doctrine.orm.query_extension.item }
+
+  App\EventSubscriber\GenerateSlugSubscriber:
+    tags:
+      - { name: doctrine.event_subscriber }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "135c03038f6e511b6942832a0b2bd6c1",
+    "content-hash": "6f15e537cfdbc7ca95b1d714e22d7441",
     "packages": [
         {
             "name": "api-platform/core",
@@ -1737,6 +1737,63 @@
                 }
             ],
             "time": "2021-05-22T16:11:15+00:00"
+        },
+        {
+            "name": "hidehalo/nanoid-php",
+            "version": "1.1.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/hidehalo/nanoid-php.git",
+                "reference": "14187ab7a5affa34078b6a54df94176bb7a21227"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/hidehalo/nanoid-php/zipball/14187ab7a5affa34078b6a54df94176bb7a21227",
+                "reference": "14187ab7a5affa34078b6a54df94176bb7a21227",
+                "shasum": ""
+            },
+            "require": {
+                "paragonie/random_compat": ">=2.0",
+                "php": "~5.6|~7.0|~8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": ">=5.6",
+                "squizlabs/php_codesniffer": "^2.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Hidehalo\\Nanoid\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "hidehalo",
+                    "email": "tianchen_cc@yeah.net",
+                    "homepage": "https://github.com/hidehalo",
+                    "role": "Owner"
+                }
+            ],
+            "description": "A copy of nanoid in PHP",
+            "homepage": "https://github.com/hidehalo/nanoid-php",
+            "keywords": [
+                "hidehalo",
+                "nanoid-php"
+            ],
+            "support": {
+                "issues": "https://github.com/hidehalo/nanoid-php/issues",
+                "source": "https://github.com/hidehalo/nanoid-php/tree/1.1.8"
+            },
+            "time": "2020-12-11T09:24:45+00:00"
         },
         {
             "name": "laminas/laminas-code",
@@ -9931,6 +9988,7 @@
     "prefer-lowest": false,
     "platform": {
         "php": ">=8.0",
+        "ext-apcu": "*",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
