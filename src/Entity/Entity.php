@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\{ApiProperty, ApiResource};
-use JetBrains\PhpStorm\Pure;
 use App\{Repository\EntityRepository, Validator as CustomAssert};
 use Doctrine\ORM\Mapping as ORM;
+use JetBrains\PhpStorm\Pure;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -37,6 +37,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Assert\EnableAutoMapping]
 class Entity extends AbstractEntity
 {
+    #[Assert\DisableAutoMapping]
+    protected ?string $slug = null;
+
     #[ORM\ManyToOne(
         targetEntity: Project::class,
         fetch: 'EAGER',
