@@ -59,6 +59,8 @@ class Project extends AbstractEntity
     #[ORM\ManyToOne(User::class, fetch: 'EAGER', inversedBy: 'projects')]
     #[ORM\JoinColumn(nullable: false)]
     #[CustomAssert\MaxEntries(User::MAX_PROJECTS_PER_USER)]
+    #[ApiProperty(security: "is_granted('ROLE_ADMIN')")]
+    #[Groups(['project:read', 'project:details'])]
     private ?User $user = null;
 
     // Note: This validation only apply when entities are persisted from a
@@ -85,6 +87,7 @@ class Project extends AbstractEntity
     /**
      * {@inheritDoc}
      */
+    #[Pure]
     public function toUniqueString(): string
     {
         return $this->getName().' '.$this->user->getUsername();
@@ -114,6 +117,9 @@ class Project extends AbstractEntity
         return $this;
     }
 
+    /**
+     * @return  Collection<int, Entity>
+     */
     public function getEntities(): Collection
     {
         return $this->entities;

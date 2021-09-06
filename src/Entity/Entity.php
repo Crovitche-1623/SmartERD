@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\{ApiProperty, ApiResource};
+use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use JetBrains\PhpStorm\Pure;
 use App\{Repository\EntityRepository, Validator as CustomAssert};
 use Doctrine\ORM\Mapping as ORM;
@@ -56,6 +57,16 @@ class Entity extends AbstractEntity
     #[Assert\Regex('/^[a-z]+$/i', htmlPattern: '^[a-zA-Z]+$')]
     private ?string $name = null;
 
+    #[ORM\OneToMany('entity', Attribute::class, orphanRemoval: true)]
+    #[Groups('project:details')]
+    private Collection $attributes;
+
+    #[Pure]
+    public function __construct()
+    {
+        $this->attributes = new ArrayCollection();
+    }
+
     #[Pure]
     public function __toString(): string
     {
@@ -91,6 +102,36 @@ class Entity extends AbstractEntity
     public function setName(?string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * @return  Collection<int, Attribute>
+     */
+    public function getAttributes(): Collection
+    {
+        return $this->attributes;
+    }
+
+    public function addAttribute(Attribute $attribute): self
+    {
+        if (!$this->attributes->contains($attribute)) {
+            $this->attributes[] = $attribute;
+            $attribute->setEntity($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAttribute(Attribute $attribute): self
+    {
+        if ($this->attributes->contains($attribute)) {
+            $this->attributes->removeElement($attribute);
+            if ($this === $attribute->getEntity()) {
+                $attribute->setEntity(null);
+            }
+        }
 
         return $this;
     }

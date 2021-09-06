@@ -11,10 +11,12 @@ use Doctrine\ORM\Mapping as ORM;
 use JetBrains\PhpStorm\Pure;
 use Lexik\Bundle\JWTAuthenticationBundle\Security\User\JWTUserInterface;
 use Symfony\Component\Security\Core\User\{PasswordAuthenticatedUserInterface, UserInterface};
+use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(UserRepository::class), ORM\Table('SERD_Members')]
 #[Assert\EnableAutoMapping]
+// TODO: Add API for User
 class User extends AbstractEntity implements
     UserInterface,
     JWTUserInterface,
@@ -24,6 +26,7 @@ class User extends AbstractEntity implements
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\Length(min: 3)]
+    #[Groups(['project:read', 'project:details'])]
     private string $username = '';
 
     #[ORM\Column(type: Types::BOOLEAN)]
@@ -185,6 +188,9 @@ class User extends AbstractEntity implements
         return $this;
     }
 
+    /**
+     * @return  Collection<int, Project>
+     */
     public function getProjects(): Collection
     {
         return $this->projects;
