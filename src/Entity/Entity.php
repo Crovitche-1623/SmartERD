@@ -38,6 +38,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Assert\EnableAutoMapping]
 class Entity extends AbstractEntity
 {
+    #[Assert\DisableAutoMapping]
+    protected ?string $slug = null;
+
     #[ORM\ManyToOne(
         targetEntity: Project::class,
         fetch: 'EAGER',

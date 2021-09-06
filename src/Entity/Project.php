@@ -51,6 +51,9 @@ class Project extends AbstractEntity
 {
     public const MAX_ENTITIES_PER_PROJECT = 30;
 
+    #[Assert\DisableAutoMapping]
+    protected ?string $slug = null;
+
     #[ORM\Column(length: 50)]
     #[ApiProperty(iri: 'https://schema.org/name')]
     #[Groups(['project:create', 'project:read', 'project:details'])]
