@@ -68,7 +68,11 @@ class Project extends AbstractEntity
 
     // Note: This validation only apply when entities are persisted from a
     //       project.
-    #[ORM\OneToMany("project", Entity::class, orphanRemoval: true)]
+    #[ORM\OneToMany(
+        mappedBy: "project",
+        targetEntity: Entity::class,
+        orphanRemoval: true
+    )]
     #[Groups('project:details')]
     #[Assert\Count(
         max: self::MAX_ENTITIES_PER_PROJECT,

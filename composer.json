@@ -9,6 +9,7 @@
     "ext-apcu": "*",
     "ext-ctype": "*",
     "ext-iconv": "*",
+    "ext-intl": "*",
     "ext-json": "*",
     "ext-openssl": "*",
     "ext-pcre": "*",

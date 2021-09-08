@@ -80,7 +80,7 @@ final class ProjectFixtures extends BaseFixture implements
             unset($userNumber);
 
             $project
-                ->setName($this->faker->company())
+                ->setName($this->faker->unique()->company())
                 ->setUser($creator)
             ;
         });

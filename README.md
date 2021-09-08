@@ -11,7 +11,7 @@ These are used to have a model of the database while ignoring the RDBMS used.
  1. Run `docker compose build --pull --no-cache` to build fresh images
  2. Run `docker compose up -d` to run the services
  3. Run `docker compose exec php composer install -n` to install Composer dependencies
- 4. Run `docker compose exec php bin/console app:setup` to set up the app
+ 4. Run `docker compose exec php bin/console app:setup` to set up the app (do not use this command in production)
  5. Open [the app](http://localhost:9000) in your favorite Web Browser.
  
 ## Tests

@@ -13,6 +13,7 @@ use Faker\{Factory, Generator};
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Component\HttpFoundation\{Request, Response};
 use Symfony\Contracts\HttpClient\HttpClientInterface;
+use Symfony\Contracts\HttpClient\ResponseInterface;
 
 final class EntitiesTest extends ApiTestCase
 {
@@ -41,6 +42,32 @@ final class EntitiesTest extends ApiTestCase
             $this->fixturesHaveBeenLoaded = true;
         }
         parent::setUp();
+    }
+
+    public function testCreateEntity(
+        string $entityName = 'test',
+        bool $asAdmin = false
+    ): ResponseInterface
+    {
+        $this->client = JsonAuthenticatorTest::login($asAdmin);
+
+        $projectIri = $this->findIriBy(Project::class, [
+            'name' => $asAdmin ?
+                ProjectFixtures::ADMIN_PROJECT_NAME :
+                ProjectFixtures::USER_PROJECT_NAME_1
+        ]);
+
+        $response = $this->client->request('POST', '/entities', [
+            'json' => [
+                'name' => $entityName,
+                'project' => $projectIri
+            ]
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
+        self::assertMatchesResourceItemJsonSchema(Entity::class);
+
+        return $response;
     }
 
     public function testUserCantAccessEntitiesFromProjectHeDoesNotOwn(): void
@@ -76,6 +103,11 @@ final class EntitiesTest extends ApiTestCase
         ]);
     }
 
+    /**
+     * It's useless to test this case if we can't create a simple entity
+     *
+     * @depends  testCreateEntity
+     */
     public function testCreateAnEntityInAnotherUserProjectReturn404(): void
     {
         $adminProjectIri = $this->findIriBy(Project::class, [
@@ -100,26 +132,62 @@ final class EntitiesTest extends ApiTestCase
     // TODO: Check if the project of entity cannot be changed over time.
     //       (check serialization_group for PATCH)
 
-    public function testEntityProjectCannotChangeOverTime(): void
+    public function testPartialUpdateEntity(): void
     {
-        $aUserProjectIri = $this->findIriBy(Project::class, [
-           'name' => ProjectFixtures::USER_PROJECT_NAME_1
+        /** @var  Project  $projectFromFixtures */
+        $projectFromFixtures = $this->em->getRepository(Project::class)->findOneBy([
+            'name' => ProjectFixtures::USER_PROJECT_NAME_1
         ]);
 
-        $response = $this->client->request('POST', '/entities', [
+        $projectFromFixtures = $this->em->getReference(Project::class, $projectFromFixtures->getId());
+
+        $aNewEntity = (new Entity)
+            ->setName('test')
+            ->setProject($projectFromFixtures)
+        ;
+
+        $this->em->persist($aNewEntity);
+        $this->em->flush();
+
+        $this->client->request('PATCH', "/entities/{$aNewEntity->getId()}", [
+            'headers' => [
+                'content-type' => 'application/merge-patch+json',
+            ],
             'json' => [
-                'name' => 'MyProjectCannotChangeOverTime',
-                'project' => $aUserProjectIri
+                'name' => 'anotherName'
             ]
         ]);
 
-        $iri = $response->toArray()['@id'];
+        self::assertResponseStatusCodeSame(Response::HTTP_OK);
+        self::assertMatchesResourceItemJsonSchema(Entity::class);
+    }
+
+    /**
+     * @depends  testPartialUpdateEntity
+     */
+    public function testEntityProjectCannotChangeOverTime(): void
+    {
+        /** @var  Project  $project */
+        $project = $this->em->getRepository(Project::class)->findOneBy([
+            'name' => ProjectFixtures::USER_PROJECT_NAME_1
+        ]);
+
+        $project = $this->em->getReference(Project::class, $project->getId());
+
+        $newEntity = (new Entity)
+            ->setName('MyProjectCannotChangeOverTime')
+            ->setProject($project);
+
+        unset($project);
+
+        $this->em->persist($newEntity);
+        $this->em->flush();
 
         $anotherUserProjectIri = $this->findIriBy(Project::class, [
             'name' => ProjectFixtures::USER_PROJECT_NAME_2
         ]);
 
-        $this->client->request('PATCH', $iri, [
+        $this->client->request('PATCH', "/entities/{$newEntity->getId()}", [
             'headers' => [
               'content-type' => 'application/merge-patch+json',
             ],
@@ -132,6 +200,9 @@ final class EntitiesTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(Entity::class);
     }
 
+    /**
+     * @depends testCreateEntity
+     */
     public function testMaxEntitiesPerProject(): void
     {
         $this->purgeUserProject();
@@ -141,15 +212,19 @@ final class EntitiesTest extends ApiTestCase
         ]);
 
         for ($i = 0; $i < Project::MAX_ENTITIES_PER_PROJECT; ++$i) {
+            // Use a formatter to convert the index (for example: 1) to number
+            // written using letters (to one)
+            $formatter = new \NumberFormatter('en', \NumberFormatter::SPELLOUT);
+            $name = str_replace('-', '', $formatter->format($i));
             $this->client->request('POST', '/entities', [
                 'json' => [
-                    'name' => $this->faker->unique()->word(),
+                    'name' => $name,
                     'project' => $aUserProjectIri
                 ]
             ]);
         }
 
-        $this->client->request(Request::METHOD_POST, '/entities', [
+         $this->client->request('POST', '/entities', [
             'json' => [
                 'name' => 'IAmTryingToExceedTheLimit',
                 'project' => $aUserProjectIri
@@ -160,7 +235,7 @@ final class EntitiesTest extends ApiTestCase
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
             'title' => 'An error occurred',
-            'detail' => "project: The maximum number of Entity (30) for this Project has been reached."
+            'detail' => "project: The maximum number of Entity (". Project::MAX_ENTITIES_PER_PROJECT .") for this Project has been reached."
         ]);
 
         // Revert the database to original state for the other tests.
