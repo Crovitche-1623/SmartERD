@@ -240,7 +240,6 @@ final class ProjectsTest extends ApiTestCase
             '@type' => 'https://schema.org/Project',
             'name' => ProjectFixtures::USER_PROJECT_NAME_1,
         ]);
-        self::assertMatchesRegularExpression('~^/projects/\d+$~', $response->toArray()['@id']);
         self::assertMatchesResourceItemJsonSchema(Project::class);
     }
 

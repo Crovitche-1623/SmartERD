@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\EventSubscriber;
 
 use App\Entity\AbstractEntity;
+use App\Entity\SlugTrait;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\{Event\LifecycleEventArgs, Events};
 use Hidehalo\Nanoid\Client;
@@ -50,11 +51,24 @@ final class GenerateSlugSubscriber implements EventSubscriber
 
     private function entityUseSlug(object $entity): bool
     {
-        // Here is noted all the ways to know if the entity is using a slug, a
-        // trait could have been used and then a check could have been made to
-        // see if the correct trait had been used but in this case, checking if
-        // the entity extends the abstract class is sufficient.
-        return $entity instanceof AbstractEntity;
+        $usedTraits = self::retrieveUsedTraits($entity);
+
+        return in_array(SlugTrait::class, $usedTraits);
+    }
+
+    private static function retrieveUsedTraits(object $class): array
+    {
+        $traits = [];
+
+        do {
+            $traits = array_merge(class_uses($class, true), $traits);
+        } while ($class = get_parent_class($class));
+
+        foreach ($traits as $trait => $same) {
+            $traits = array_merge(class_uses($trait, true), $traits);
+        }
+
+        return array_unique($traits);
     }
 
     private static function generateSlug(): string

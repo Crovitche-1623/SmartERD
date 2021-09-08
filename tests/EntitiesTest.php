@@ -149,7 +149,7 @@ final class EntitiesTest extends ApiTestCase
         $this->em->persist($aNewEntity);
         $this->em->flush();
 
-        $this->client->request('PATCH', "/entities/{$aNewEntity->getId()}", [
+        $this->client->request('PATCH', "/entities/{$aNewEntity->getSlug()}", [
             'headers' => [
                 'content-type' => 'application/merge-patch+json',
             ],
@@ -187,7 +187,7 @@ final class EntitiesTest extends ApiTestCase
             'name' => ProjectFixtures::USER_PROJECT_NAME_2
         ]);
 
-        $this->client->request('PATCH', "/entities/{$newEntity->getId()}", [
+        $this->client->request('PATCH', "/entities/{$newEntity->getSlug()}", [
             'headers' => [
               'content-type' => 'application/merge-patch+json',
             ],

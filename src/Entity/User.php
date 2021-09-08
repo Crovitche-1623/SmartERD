@@ -22,6 +22,8 @@ class User extends AbstractEntity implements
     JWTUserInterface,
     PasswordAuthenticatedUserInterface
 {
+    use SlugTrait;
+
     public const MAX_PROJECTS_PER_USER = 5;
 
     #[ORM\Column(length: 180, unique: true)]

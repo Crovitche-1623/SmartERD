@@ -49,10 +49,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 class Project extends AbstractEntity
 {
-    public const MAX_ENTITIES_PER_PROJECT = 30;
+    use SlugTrait;
 
-    #[Assert\DisableAutoMapping]
-    protected ?string $slug = null;
+    public const MAX_ENTITIES_PER_PROJECT = 30;
 
     #[ORM\Column(length: 50)]
     #[ApiProperty(iri: 'https://schema.org/name')]

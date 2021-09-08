@@ -14,6 +14,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(AttributeRepository::class), ORM\Table('SERD_Attributes')]
 class Attribute extends AbstractEntity
 {
+    use SlugTrait;
+
     #[ORM\Column(length: 180)]
     #[ApiProperty(iri: 'https://schema.org/name')]
     #[Groups('project:details')]
