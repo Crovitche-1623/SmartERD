@@ -55,3 +55,6 @@ services:
   App\EventSubscriber\GenerateSlugSubscriber:
     tags:
       - { name: doctrine.event_subscriber }
+
+  App\DataTransformer\ProjectInputDataTransformer:
+    tags: [ 'api_platform.data_transformer' ]

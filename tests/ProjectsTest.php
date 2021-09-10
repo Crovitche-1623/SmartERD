@@ -76,7 +76,7 @@ final class ProjectsTest extends ApiTestCase
         //      because the developers from Symfony think json should be always
         //      utf-8 encoded but api platform developers think it's more
         //      useful to have the charset for debugging and clarity.
-        self::assertResponseHeaderSame('content-type', 'application/json');
+        self::assertResponseHeaderSame('content-type', "application/ld+json; charset=utf-8");
         self::assertJsonContains(['name' => $name]);
     }
 
@@ -102,10 +102,10 @@ final class ProjectsTest extends ApiTestCase
             'json' => ['name' => $sameName]
         ]);
 
-        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
-            'title' => 'Validation Failed',
+            'title' => 'An error occurred',
             'detail' => "name: You have already created a project with this name \"${sameName}\""
         ]);
     }
@@ -125,10 +125,10 @@ final class ProjectsTest extends ApiTestCase
             ]
         ]);
 
-        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
-            'title' => 'Validation Failed',
+            'title' => 'An error occurred',
             'detail' => "name: This value is too long. It should have 50 characters or less."
         ]);
     }
@@ -185,10 +185,10 @@ final class ProjectsTest extends ApiTestCase
             ]
         ]);
 
-        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
         self::assertJsonContains([
-            'title' => 'Validation Failed',
+            'title' => 'An error occurred',
             'detail' => "user: The maximum number of Project (". User::MAX_PROJECTS_PER_USER .") for this User has been reached."
         ]);
 

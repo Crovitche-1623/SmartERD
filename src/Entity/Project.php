@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace App\Entity;
 
 use ApiPlatform\Core\Annotation\{ApiProperty, ApiResource};
+use App\Dto\ProjectInput;
 use App\Repository\ProjectRepository;
 use App\Validator as CustomAssert;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
@@ -25,9 +26,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 // N.B: All the "security" annotation below is an additional security because
 //      an additional "where" close is added foreach DQL query.
 #[ApiResource(
-    collectionOperations: ['get' => [
-        'method' => 'get'
-    ]],
+    collectionOperations: [
+        'get',
+        'post' => [
+            'input' => ProjectInput::class,
+            'normalization_context' => ['groups' => ['project:read']],
+            'denormalization_context' => ['groups' => ['project:create']]
+        ],
+    ],
     iri: 'https://schema.org/Project',
     itemOperations: [
         'get' => [
