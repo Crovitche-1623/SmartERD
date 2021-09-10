@@ -6,12 +6,21 @@ namespace App\Tests;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\ProjectFixtures;
+use App\DataFixtures\UserFixtures;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\ORMException;
 use App\Entity\{Project, User};
 use App\Repository\ProjectRepository;
 use App\Tests\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\EntityManagerInterface;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 final class ProjectsTest extends ApiTestCase
@@ -43,6 +52,13 @@ final class ProjectsTest extends ApiTestCase
         parent::setUp();
     }
 
+    /**
+     * @throws  TransportExceptionInterface
+     * @throws  ServerExceptionInterface
+     * @throws  RedirectionExceptionInterface
+     * @throws  DecodingExceptionInterface
+     * @throws  ClientExceptionInterface
+     */
     public function testCreate(): void
     {
         $name = 'Test Project';
@@ -67,6 +83,12 @@ final class ProjectsTest extends ApiTestCase
     /**
      * Same user could not create the same project. A Project is identified by
      * his author and his name
+     *
+     * @throws  TransportExceptionInterface
+     * @throws  ServerExceptionInterface
+     * @throws  RedirectionExceptionInterface
+     * @throws  DecodingExceptionInterface
+     * @throws  ClientExceptionInterface
      */
     public function testCreateSame(): void
     {
@@ -88,6 +110,13 @@ final class ProjectsTest extends ApiTestCase
         ]);
     }
 
+    /**
+     * @throws  TransportExceptionInterface
+     * @throws  ServerExceptionInterface
+     * @throws  RedirectionExceptionInterface
+     * @throws  DecodingExceptionInterface
+     * @throws  ClientExceptionInterface
+     */
     public function testCreateWithTooLongName(): void
     {
         $this->client->request('POST', '/projects', [
@@ -104,18 +133,76 @@ final class ProjectsTest extends ApiTestCase
         ]);
     }
 
-    // TODO: Finish
-//    public function testCreateToMuchProject(): void
-//    {
-//        for ($i = 0; $i < User::MAX_PROJECTS_PER_USER; ++$i) {
-//            $this->client->request('POST', '/projects', [
-//                'json' => [
-//                    'name' => 'project'. $i
-//                ]
-//            ]);
-//        }
-//    }
 
+    /**
+     * @throws  TransportExceptionInterface
+     * @throws  ServerExceptionInterface
+     * @throws  ORMException
+     * @throws  RedirectionExceptionInterface
+     * @throws  DecodingExceptionInterface
+     * @throws  ClientExceptionInterface
+     */
+    public function testCreateToMuchProject(): void
+    {
+        $this->client = JsonAuthenticatorTest::login(asAdmin: false);
+        // First, we have to delete all the projects belonging to the user
+        // To do this, we'll use the user from DataFixtures, so we don't have to
+        // create a new one.
+
+        // 1. Retrieve the user using DataFixture constants.
+        $user = $this->em->getRepository(User::class)->findOneBy([
+           'username' => UserFixtures::USER_USERNAME
+        ]);
+
+        $user = $this->em->getReference(User::class, $user->getId());
+
+        // 2. Use the user id to delete all the projects
+        $this->em->createQuery(<<<DQL
+                DELETE
+                    App\Entity\Project p0
+                WHERE
+                    p0.user = :userId
+            DQL)
+            ->setParameter('userId', $user->getId())
+            ->execute();
+
+        // 3. Create all the project using the repository, so we're not
+        //    dependent on the route. To explain furthermore, the error message
+        //    should always work even if the data cannot be persisted for
+        //    instance
+        for ($i = 0; $i < User::MAX_PROJECTS_PER_USER; ++$i) {
+            $this->em->persist(
+                (new Project)
+                    ->setName((string) $i)
+                    ->setUser($user)
+            );
+        }
+        $this->em->flush();
+
+         $this->client->request('POST', '/projects', [
+            'json' => [
+                'name' => 'ThisProjectExceedTheLimit'
+            ]
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
+        self::assertJsonContains([
+            'title' => 'Validation Failed',
+            'detail' => "user: The maximum number of Project (". User::MAX_PROJECTS_PER_USER .") for this User has been reached."
+        ]);
+
+        // Revert the database to original state for the other tests.
+        $this->fixturesHaveBeenLoaded = false;
+    }
+
+    /**
+     * @throws  TransportExceptionInterface
+     * @throws  ServerExceptionInterface
+     * @throws  RedirectionExceptionInterface
+     * @throws  DecodingExceptionInterface
+     * @throws  ClientExceptionInterface
+     */
     public function testUserCanAccessHisProjects(): void
     {
         $this->client = JsonAuthenticatorTest::login(asAdmin: false);
@@ -136,6 +223,15 @@ final class ProjectsTest extends ApiTestCase
         // self::assertMatchesResourceCollectionJsonSchema(Project::class);
     }
 
+    /**
+     * @throws  RedirectionExceptionInterface
+     * @throws  DecodingExceptionInterface
+     * @throws  ClientExceptionInterface
+     * @throws  TransportExceptionInterface
+     * @throws  ServerExceptionInterface
+     * @throws  NonUniqueResultException
+     * @throws  NoResultException
+     */
     public function testAdminCanAccessAllProjects(): void
     {
         $this->client->request('GET', '/projects');
@@ -172,9 +268,10 @@ final class ProjectsTest extends ApiTestCase
     }
 
     /**
-     * @example User 1 has the projects 3,4,5 & the user 2 the projects 6,7,8:
-     *          If the user 1 request /projects/6 it should return a 404
-     *          response.
+     * @throws  TransportExceptionInterface
+     * @example  User 1 has the projects 3,4,5 & the user 2 the projects 6,7,8:
+     *           If the user 1 request /projects/6 it should return a 404
+     *           response.
      */
     public function testOtherUserProjectAreNotAvailableAsUser(): void
     {
@@ -204,14 +301,21 @@ final class ProjectsTest extends ApiTestCase
         //  - "composer require symfony/monolog-bundle" otherwise
         // otherwise log will appear directly in terminal.
 
-        // We are asking for a admin project so it must return a 404 response
-        // not a 403 because otherwise an other user can see the id is valid.
+        // We are asking for an admin project, so it must return a 404 response
+        // not a 403 because otherwise another user can see the id is valid.
         $this->client->request('GET', $url);
 
         self::assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
         self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
     }
 
+    /**
+     * @throws  TransportExceptionInterface
+     * @throws  ServerExceptionInterface
+     * @throws  RedirectionExceptionInterface
+     * @throws  DecodingExceptionInterface
+     * @throws  ClientExceptionInterface
+     */
     public function testUserProjectsAreAvailableAsAdmin(): void
     {
         /**
@@ -229,8 +333,8 @@ final class ProjectsTest extends ApiTestCase
             'user' => $user
         ]);
 
-        // We are asking for a admin project so it must return a 403 response
-        $response = $this->client->request('GET', $url);
+        // We are asking for an admin project, so it must return a 403 response
+        $this->client->request('GET', $url);
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('content-type', 'application/ld+json; charset=utf-8');
