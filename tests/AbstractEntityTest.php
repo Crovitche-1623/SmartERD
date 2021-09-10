@@ -21,7 +21,10 @@ final class AbstractEntityTest extends ApiTestCase
 
         $container = AbstractEntityTest::getContainer();
 
-        $this->validator = $container->get('test.validator');
+        /** @var  ValidatorInterface  $validator */
+        $validator = $container->get('test.validator');
+
+        $this->validator = $validator;
     }
 
     public function testSlugDoesNotContainsInvalidCharacters(): void
