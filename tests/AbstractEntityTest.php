@@ -17,12 +17,8 @@ final class AbstractEntityTest extends ApiTestCase
      */
     public function setUp(): void
     {
-        self::bootKernel();
-
-        $container = AbstractEntityTest::getContainer();
-
         /** @var  ValidatorInterface  $validator */
-        $validator = $container->get('test.validator');
+        $validator = self::getContainer()->get('test.validator');
 
         $this->validator = $validator;
     }
