@@ -105,7 +105,6 @@ final class EntitiesTest extends ApiTestCase
 
     /**
      * It's useless to test this case if we can't create a simple entity
-     *
      * @depends  testCreateEntity
      */
     public function testCreateAnEntityInAnotherUserProjectReturn404(): void

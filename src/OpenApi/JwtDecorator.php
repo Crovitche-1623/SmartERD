@@ -35,7 +35,7 @@ final class JwtDecorator implements OpenApiFactoryInterface
             'properties' => [
                 'username' => [
                     'type' => 'string',
-                    'example' => 'admin',
+                    'example' => UserFixtures::ADMIN_USERNAME,
                 ],
                 'password' => [
                     'type' => 'string',
