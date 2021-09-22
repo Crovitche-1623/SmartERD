@@ -12,6 +12,9 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
+/**
+ * FIXME: Check concurrency and if a transaction is needed.
+ */
 final class PositionValidator extends ConstraintValidator
 {
     public function __construct(

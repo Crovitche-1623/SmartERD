@@ -11,6 +11,9 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
+/**
+ * FIXME: Check concurrency and if a transaction is needed.
+ */
 final class NoHolesInPositionValidator extends ConstraintValidator
 {
     public function __construct(private EntityManagerInterface $entityManager)
@@ -31,23 +34,21 @@ final class NoHolesInPositionValidator extends ConstraintValidator
 
         $givenPositon = $value;
 
-        if (null === $parentFqdnObject = $this->context->getObject()) {
+        if (!($parentFqdnObject = $this->context->getObject())) {
             throw new UnexpectedTypeException($parentFqdnObject, 'object');
         }
 
-        /** @var  object  $parentFqdnObject */
-        $parentFqdnName = get_class($parentFqdnObject);
-
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->select('MAX(c0.position)')
-            ->from($parentFqdnName, 'c0');
+            ->from(get_class($parentFqdnObject), 'c0');
 
-        $property = $constraint->sortableGroupProperty;
-
-        if ($property) {
+        if ($property = $constraint->sortableGroupProperty) {
             $queryBuilder
                 ->where(sprintf('c0.%s = :id', $property))
-                ->setParameter('id', $parentFqdnObject->{'get'. ucfirst($property)}()->getId());
+                ->setParameter(
+                    'id',
+                    $parentFqdnObject->{'get'. ucfirst($property)}()->getId()
+                );
         }
 
         $query = $queryBuilder->getQuery();
