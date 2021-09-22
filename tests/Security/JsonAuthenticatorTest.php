@@ -44,7 +44,8 @@ final class JsonAuthenticatorTest extends ApiTestCase
 
         $response = $client->request('POST', '/login_check', [
             'json' => [
-                'username' => $asAdmin ? 'admin' : 'user',
+                'username' => $asAdmin ?
+                    UserFixtures::ADMIN_USERNAME : UserFixtures::USER_USERNAME,
                 'password' => UserFixtures::DEFAULT_USER_PASSWORD
             ]
         ]);

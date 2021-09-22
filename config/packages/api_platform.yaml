@@ -20,8 +20,6 @@ api_platform:
                 name: Authorization
                 type: header
 
-    enable_re_doc: false
-
     title: 'SmartERD API Documentation'
     description: 'An API for the Entity Relationship Diagram management'
     version: 1.0.0

@@ -4,6 +4,8 @@ declare(strict_types = 1);
 
 namespace App\Entity;
 
+use ApiPlatform\Core\Annotation\ApiProperty;
+use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\{ArrayCollection, Collection};
 use Doctrine\DBAL\Types\Types;
@@ -16,7 +18,24 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(UserRepository::class), ORM\Table('SERD_Members')]
 #[Assert\EnableAutoMapping]
-// TODO: Add API for User
+#[ApiResource(
+    collectionOperations: [
+        'post' => [
+            'security' => "is_granted('ROLE_ADMIN')",
+        ],
+    ],
+    iri: 'https://schema.org/Person',
+    itemOperations: [
+        'get' => [
+            'security' => "is_granted('ROLE_ADMIN') or object.getId() == user.getId()",
+        ],
+    ],
+    denormalizationContext: [
+        'groups' => ['user:create'],
+        'allow_extra_attributes' => false,
+    ],
+    normalizationContext: ['groups' => ['user:read']]
+)]
 class User extends AbstractEntity implements
     UserInterface,
     JWTUserInterface,
@@ -28,7 +47,7 @@ class User extends AbstractEntity implements
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\Length(min: 3)]
-    #[Groups(['project:read', 'project:details'])]
+    #[Groups(['user:create', 'user:read', 'project:read', 'project:details'])]
     private string $username = '';
 
     #[ORM\Column(type: Types::BOOLEAN)]
@@ -40,6 +59,8 @@ class User extends AbstractEntity implements
     #[Assert\Type('string')]
     #[Assert\Length(min: 6, max: 180)]
     #[Assert\NotCompromisedPassword]
+    #[ApiProperty(iri: 'https://schema.org/accessCode')]
+    #[Groups('user:create')]
     private ?string $plainPassword = null;
 
     #[ORM\Column(length: 180)]
@@ -48,9 +69,11 @@ class User extends AbstractEntity implements
 
     #[ORM\Column(length: 180, unique: true)]
     #[Assert\Email]
+    #[Groups(['user:read', 'user:create'])]
     private ?string $email = null;
 
     #[ORM\OneToMany('user', Project::class, orphanRemoval: true)]
+    #[Groups(['user:read'])]
     private Collection $projects;
 
     #[Pure]

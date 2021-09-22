@@ -37,7 +37,7 @@ final class ProjectsTest extends ApiTestCase
         $kernel = self::bootKernel();
         $this->em = $kernel->getContainer()->get('doctrine')->getManager();
         $databaseTool = $kernel->getContainer()->get(DatabaseToolCollection::class)->get();
-        $this->client = JsonAuthenticatorTest::login();
+        $this->client = JsonAuthenticatorTest::login(asAdmin: true);
 
         if (!$this->fixturesHaveBeenLoaded) {
             $databaseTool->loadFixtures([
@@ -324,7 +324,7 @@ final class ProjectsTest extends ApiTestCase
          * @var  User  $user
          */
         $user = $this->em->getRepository(User::class)
-            ->findOneBy(['username' => 'user']);
+            ->findOneBy(['username' => UserFixtures::USER_USERNAME]);
 
         // findIriBy allows to retrieve the IRI of an item by searching for some
         // of its properties.

@@ -38,7 +38,6 @@ final class NoHolesInPositionValidator extends ConstraintValidator
             throw new UnexpectedTypeException($parentFqdnObject, 'object');
         }
 
-        /** @var  object  $parentFqdnObject */
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->select('MAX(c0.position)')
             ->from(get_class($parentFqdnObject), 'c0');
