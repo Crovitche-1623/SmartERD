@@ -24,6 +24,7 @@
     "doctrine/doctrine-bundle": "^2.4",
     "doctrine/doctrine-migrations-bundle": "^3.1",
     "doctrine/orm": "^2.9",
+    "gedmo/doctrine-extensions": "^3.1",
     "hidehalo/nanoid-php": "^1.1",
     "lexik/jwt-authentication-bundle": "^2.6",
     "nelmio/cors-bundle": "*",

@@ -12,7 +12,7 @@ use Symfony\Component\Validator\Constraint;
  */
 #[Attribute] final class MaxEntries extends Constraint
 {
-    public string $message = 'The maximum number of {{ parentName }} ({{ max }}) for this {{ childName }} has been reached.';
+    public const MESSAGE = 'The maximum number of {{ parentName }} ({{ max }}) for this {{ childName }} has been reached.';
 
     public function __construct(
         public int $max,

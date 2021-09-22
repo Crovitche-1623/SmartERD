@@ -4,20 +4,46 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use Doctrine\Bundle\FixturesBundle\Fixture;
+use App\Entity\{Attribute, Entity};
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
-use Faker\{Factory, Generator};
 
-final class AttributeFixtures extends BaseFixture
+final class AttributeFixtures extends BaseFixture implements
+    DependentFixtureInterface
 {
-    private ObjectManager $manager;
+    /**
+     * {@inheritDoc}
+     */
+    public function getDependencies(): array
+    {
+        return [EntityFixtures::class];
+    }
 
     /**
      * {@inheritDoc}
      */
     protected function loadData(ObjectManager $manager): void
     {
-        $this->manager = $manager;
-        $this->faker = Factory::create('fr_CH');
+        /**
+         * @var  Entity  $entity
+         */
+        $entity = $this->getSafeReference(
+            className: Entity::class,
+            uniquePart:  EntityFixtures::USER_PROJECT_ENTITY_NAME . ' ' . ProjectFixtures::USER_PROJECT_NAME_1
+        );
+
+        $manager->persist(
+            (new Attribute)
+                ->setName('fullName')
+                ->setEntity($entity)
+        );
+
+        $manager->persist(
+            (new Attribute)
+                ->setName('birthDate')
+                ->setEntity($entity)
+        );
+
+        $manager->flush();
     }
 }
