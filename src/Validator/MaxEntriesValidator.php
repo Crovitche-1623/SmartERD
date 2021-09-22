@@ -8,6 +8,9 @@ use Doctrine\ORM\{EntityManagerInterface, NoResultException};
 use Symfony\Component\{Validator\Constraint, Validator\ConstraintValidator};
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
+/**
+ * TODO: Check concurrency access with COUNT
+ */
 final class MaxEntriesValidator extends ConstraintValidator
 {
     public function __construct(private EntityManagerInterface $entityManager)
