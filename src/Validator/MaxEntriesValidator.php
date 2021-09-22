@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Validator;
 
 use Doctrine\ORM\{EntityManagerInterface, NoResultException};
-use ReflectionClass;
 use Symfony\Component\{Validator\Constraint, Validator\ConstraintValidator};
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
@@ -41,16 +40,16 @@ final class MaxEntriesValidator extends ConstraintValidator
 
         $query->setParameter('id', $value->getId());
 
-        $childShortName = (new ReflectionClass(get_class($value)))->getShortName();
+        $childShortName = (new \ReflectionClass(get_class($value)))->getShortName();
 
         try {
             $entriesCount = (int) $query->getSingleScalarResult();
 
             if ($entriesCount >= $constraint->max) {
-                $this->context->buildViolation($constraint->message)
+                $this->context->buildViolation($constraint::MESSAGE)
                     ->setParameter('{{ max }}', (string) $constraint->max)
                     ->setParameter('{{ childName }}', $childShortName)
-                    ->setParameter('{{ parentName }}', (new ReflectionClass($parentFqdn))->getShortName())
+                    ->setParameter('{{ parentName }}', (new \ReflectionClass($parentFqdn))->getShortName())
                     ->addViolation();
             }
         } catch (NoResultException) {

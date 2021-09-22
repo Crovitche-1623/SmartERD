@@ -40,6 +40,8 @@ class Entity extends AbstractEntity
 {
     use SlugTrait;
 
+    public const MAX_ATTRIBUTES_PER_ENTITY = 127;
+
     #[ORM\ManyToOne(
         targetEntity: Project::class,
         fetch: 'EAGER',
@@ -60,6 +62,7 @@ class Entity extends AbstractEntity
     private ?string $name = null;
 
     #[ORM\OneToMany('entity', Attribute::class, orphanRemoval: true)]
+    #[ORM\OrderBy(['position' => 'ASC'])]
     #[Groups('project:details')]
     private Collection $attributes;
 

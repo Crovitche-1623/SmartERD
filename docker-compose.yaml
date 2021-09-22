@@ -20,14 +20,18 @@ services:
     depends_on:
       - db
   nginx:
-    build: docker/nginx
+    image: nginx:stable-alpine
     ports:
       - '8080:80'
     links:
       - php
     volumes:
       - ./:/var/www/smarterd:delegated
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
       - ./docker/nginx/logs/:/var/log/nginx:cached
+    depends_on:
+      - php
+      - db
   blackfire:
     image: blackfire/blackfire:2
     ports: ['8307']

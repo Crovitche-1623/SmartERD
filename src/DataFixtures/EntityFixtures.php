@@ -13,6 +13,7 @@ final class EntityFixtures extends BaseFixture implements
 {
     public const ADMIN_PROJECT_ENTITY_NAME = 'Recipe';
     public const USER_PROJECT_ENTITY_NAME = 'Student';
+    public const ANOTHER_USER_PROJECT_ENTITY_NAME = 'Course';
 
     /**
      * {@inheritDoc}
@@ -68,7 +69,11 @@ final class EntityFixtures extends BaseFixture implements
 
     private static function getEntitiesOfUserProject(): array
     {
-        return [self::USER_PROJECT_ENTITY_NAME, 'Course', 'Registration'];
+        return [
+            self::USER_PROJECT_ENTITY_NAME,
+            self::ANOTHER_USER_PROJECT_ENTITY_NAME,
+            'Registration',
+        ];
     }
 
     private static function getEntitiesOfAdminProject(): array
