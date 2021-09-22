@@ -37,10 +37,12 @@ services:
 
   App\OpenApi\JwtDecorator:
     decorates: 'api_platform.openapi.factory'
+    arguments: [ '@App\OpenApi\JwtDecorator.inner']
     autoconfigure: false
 
   App\OpenApi\ProjectDecorator:
     decorates: 'api_platform.openapi.factory'
+    arguments: [ '@App\OpenApi\ProjectDecorator.inner']
     autoconfigure: false
 
   App\Doctrine\CurrentUserExtension:
