@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests;
+namespace App\Tests\Unit\Entity;
 
 use App\DataFixtures\EntityFixtures;
 use App\Validator\MaxEntries;
@@ -27,7 +27,11 @@ final class AttributesTest extends KernelTestCase
     {
         $container = self::getContainer();
         $this->entityManager = $container->get('doctrine')->getManager();
-        $this->validator = $container->get('test.validator');
+
+        /** @var  ValidatorInterface  $validator */
+        $validator = $container->get('test.validator');
+        $this->validator = $validator;
+
         $databaseTool = $container->get(DatabaseToolCollection::class)->get();
         if (!$this->fixturesHaveBeenLoaded) {
             $databaseTool->loadFixtures([

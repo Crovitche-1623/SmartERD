@@ -16,9 +16,8 @@ These are used to have a model of the database while ignoring the RDBMS used.
  
 ## Tests
 Execute these commands to run tests:
- 1. Execute steps 0 to 3 from the [setup section](#Setup).
- 2. Run `docker compose exec php bin/console app:setup --env=test` to set up the app in test environment
- 3. Run `docker compose exec php vendor/bin/phpunit --testdox`
+ 1. Execute steps 0 to 2 from the [setup section](#Setup).
+ 2. Run `docker compose exec php make tests` to set up the app in test environment
 
 ## Known problems when developing
 When working on Windows, WSL2 is necessary for SmartERD to be fast enough (go 

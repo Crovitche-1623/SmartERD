@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests;
+namespace App\Tests\Functional\Entity;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\{EntityFixtures, ProjectFixtures, UserFixtures};
 use App\Entity\{Entity, Project};
-use App\Tests\Security\JsonAuthenticatorTest;
+use App\Tests\Functional\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\{EntityManagerInterface, NonUniqueResultException, NoResultException};
 use Faker\{Factory, Generator};
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
@@ -19,7 +19,6 @@ final class EntitiesTest extends ApiTestCase
 {
     private EntityManagerInterface $em;
     private HttpClientInterface $client;
-    private Generator $faker;
     private bool $fixturesHaveBeenLoaded = false;
 
     /**
@@ -27,11 +26,10 @@ final class EntitiesTest extends ApiTestCase
      */
     public function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $this->em = $kernel->getContainer()->get('doctrine')->getManager();
-        $databaseTool = $kernel->getContainer()->get(DatabaseToolCollection::class)->get();
+        $container = self::getContainer();
+        $this->em = $container->get('doctrine')->getManager();
+        $databaseTool = $container->get(DatabaseToolCollection::class)->get();
         $this->client = JsonAuthenticatorTest::login(asAdmin: false);
-        $this->faker = Factory::create('fr_CH');
         if (!$this->fixturesHaveBeenLoaded) {
             $databaseTool->loadFixtures([
                 // Because ProjectFixtures need UserFixtures, UserFixtures are

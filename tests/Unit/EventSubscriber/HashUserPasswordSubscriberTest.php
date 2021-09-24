@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\EventSubscriber;
+namespace App\Tests\Unit\EventSubscriber;
 
 use App\{DataFixtures\UserFixtures, Entity\User};
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,22 +17,18 @@ final class HashUserPasswordSubscriberTest extends KernelTestCase
      */
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-
-        $this->em = $kernel->getContainer()
-            ->get('doctrine')
-            ->getManager();
+        $this->em = self::getContainer()->get('doctrine')->getManager();
 
         parent::setUp();
     }
 
     public function testPrePersist(): void
     {
-        $user = (new User())
+        $user = (new User)
             ->setUsername('test_pre_persist')
             ->setEmail('test_pre_persist@smarterd.io')
-            ->setPlainPassword(UserFixtures::DEFAULT_USER_PASSWORD)
-        ;
+            ->setPlainPassword(UserFixtures::DEFAULT_USER_PASSWORD);
+
         $this->em->persist($user);
 
         // User has been persisted so the hashed password should be set.
@@ -45,11 +41,11 @@ final class HashUserPasswordSubscriberTest extends KernelTestCase
     public function testPreUpdate(): void
     {
         // 1. Create a fresh new user
-        $user = (new User())
+        $user = (new User)
             ->setUsername('test_pre_update')
             ->setEmail('test_pre_update@smarterd.io')
-            ->setPlainPassword(UserFixtures::DEFAULT_USER_PASSWORD)
-        ;
+            ->setPlainPassword(UserFixtures::DEFAULT_USER_PASSWORD);
+
         $this->em->persist($user);
         $this->em->flush();
 

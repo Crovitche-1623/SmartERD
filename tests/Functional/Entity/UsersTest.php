@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests;
+namespace App\Tests\Functional\Entity;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\UserFixtures;
 use App\Entity\User;
-use App\Tests\Security\JsonAuthenticatorTest;
+use App\Tests\Functional\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\EntityManagerInterface;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,7 +17,6 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class UsersTest extends ApiTestCase
 {
     private HttpClientInterface $client;
-    private EntityManagerInterface $em;
     private bool $fixturesHaveBeenLoaded = false;
 
     /**
@@ -25,9 +24,7 @@ final class UsersTest extends ApiTestCase
      */
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $this->em = $kernel->getContainer()->get('doctrine')->getManager();
-        $databaseTool = $kernel->getContainer()->get(DatabaseToolCollection::class)->get();
+        $databaseTool = self::getContainer()->get(DatabaseToolCollection::class)->get();
         $this->client = JsonAuthenticatorTest::login(asAdmin: true);
 
         if (!$this->fixturesHaveBeenLoaded) {

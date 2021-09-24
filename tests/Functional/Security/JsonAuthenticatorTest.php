@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Security;
+namespace App\Tests\Functional\Security;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\UserFixtures;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -23,7 +24,6 @@ final class JsonAuthenticatorTest extends ApiTestCase
      */
     public function setUp(): void
     {
-        self::bootKernel();
         $container = self::getContainer();
 
         $databaseTool = $container->get(DatabaseToolCollection::class)->get();

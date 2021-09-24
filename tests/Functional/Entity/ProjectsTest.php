@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Tests;
+namespace App\Tests\Functional\Entity;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\ProjectFixtures;
@@ -12,7 +12,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMException;
 use App\Entity\{Project, User};
 use App\Repository\ProjectRepository;
-use App\Tests\Security\JsonAuthenticatorTest;
+use App\Tests\Functional\Security\JsonAuthenticatorTest;
 use Doctrine\ORM\EntityManagerInterface;
 use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,9 +34,9 @@ final class ProjectsTest extends ApiTestCase
      */
     protected function setUp(): void
     {
-        $kernel = self::bootKernel();
-        $this->em = $kernel->getContainer()->get('doctrine')->getManager();
-        $databaseTool = $kernel->getContainer()->get(DatabaseToolCollection::class)->get();
+        $container = self::getContainer();
+        $this->em = $container->get('doctrine')->getManager();
+        $databaseTool = $container->get(DatabaseToolCollection::class)->get();
         $this->client = JsonAuthenticatorTest::login(asAdmin: true);
 
         if (!$this->fixturesHaveBeenLoaded) {
