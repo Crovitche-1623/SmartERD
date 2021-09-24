@@ -1,4 +1,6 @@
 {
+  "name": "crovitche-1623/smarterd",
+  "description": "A Symfony project to create Entity Relationship Diagrams",
   "type": "project",
   "license": "MIT",
   "authors": [
@@ -19,7 +21,7 @@
     "ext-sodium": "*",
     "ext-tokenizer": "*",
     "api-platform/core": "^2.6",
-    "composer/package-versions-deprecated": "1.11.99.2",
+    "composer/package-versions-deprecated": "^1.11",
     "doctrine/annotations": "^1.8",
     "doctrine/doctrine-bundle": "^2.4",
     "doctrine/doctrine-migrations-bundle": "^3.1",
@@ -27,7 +29,7 @@
     "gedmo/doctrine-extensions": "^3.1",
     "hidehalo/nanoid-php": "^1.1",
     "lexik/jwt-authentication-bundle": "^2.6",
-    "nelmio/cors-bundle": "*",
+    "nelmio/cors-bundle": "^2.1",
     "phpdocumentor/reflection-docblock": "^5.2",
     "predis/predis": "^1.1",
     "symfony/asset": "5.3.*",
