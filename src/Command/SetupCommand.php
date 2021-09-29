@@ -40,6 +40,7 @@ final class SetupCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // TODO: Add Lock to avoid concurrent run
         $io = new SymfonyStyle($input, $output);
         $io->title('SmartERD - Installation assistant');
         $io->warning('Database suppression...');
@@ -50,7 +51,6 @@ final class SetupCommand extends Command
                 '--force' => true
             ]), new NullOutput)
         ;
-
         if (0 === $returnCode) {
             $io->success('The database has been deleted');
 

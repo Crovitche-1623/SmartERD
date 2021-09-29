@@ -1,19 +1,34 @@
 ; top-most EditorConfig file
 root = true
 
-; Unix-style newlines
 [*]
-end_of_line = LF
+# Change these settings to your own preference
 indent_style = space
-insert_final_newline = true
-trim_trailing_whitespace = true
 indent_size = 4
 
-[*.php]
-ij_visual_guides = 80, 120
+# We recommend you to keep these unchanged
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.{js,html}]
+indent_size = 2
+
+[*.json]
+indent_size = 2
 
 [*.md]
 trim_trailing_whitespace = false
 
-[*.{twig, html, css, yml, yaml, js, json}]
+[*.sh]
+indent_style = tab
+
+[*.{yaml,yml}]
+trim_trailing_whitespace = false
+
+[docker-compose.{yaml,yml}]
 indent_size = 2
+
+[Dockerfile]
+indent_style = tab
