@@ -81,6 +81,27 @@ final class ProjectsTest extends ApiTestCase
     }
 
     /**
+     * @throws  TransportExceptionInterface
+     * @throws  ServerExceptionInterface
+     * @throws  RedirectionExceptionInterface
+     * @throws  DecodingExceptionInterface
+     * @throws  ClientExceptionInterface
+     */
+    public function testCreateProjectWithBlankName(): void
+    {
+        $this->client->request('POST', '/projects', [
+            'json' => ['name' => ""]
+        ]);
+
+        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
+        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
+        self::assertJsonContains([
+            'title' => 'An error occurred',
+            'detail' => "name: This value should not be blank."
+        ]);
+    }
+
+    /**
      * Same user could not create the same project. A Project is identified by
      * his author and his name
      *

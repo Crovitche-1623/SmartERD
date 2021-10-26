@@ -62,6 +62,9 @@ class Project extends AbstractEntity
     #[ORM\Column(length: 50)]
     #[ApiProperty(iri: 'https://schema.org/name')]
     #[Groups(['project:create', 'project:read', 'project:details'])]
+    #[Assert\NotBlank]
+    #[Assert\Type("string")]
+    #[Assert\Length(max: 50)]
     private ?string $name = null;
 
     #[ORM\ManyToOne(User::class, fetch: 'EAGER', inversedBy: 'projects')]
