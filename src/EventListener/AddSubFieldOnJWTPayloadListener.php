@@ -23,7 +23,7 @@ final class AddSubFieldOnJWTPayloadListener
         }
 
         $payload = $event->getData();
-        $payload['sub'] = $user->getId();
+        $payload['sub'] = $user->getSlug();
         $event->setData($payload);
     }
 }

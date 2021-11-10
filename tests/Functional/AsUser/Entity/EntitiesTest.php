@@ -2,24 +2,20 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Functional\Entity;
+namespace App\Tests\Functional\AsUser\Entity;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
+use App\Service\JwtTokenGeneratorService;
 use App\DataFixtures\{EntityFixtures, ProjectFixtures, UserFixtures};
-use App\Entity\{Entity, Project};
-use App\Tests\Functional\Security\JsonAuthenticatorTest;
+use App\Entity\{Entity, Project, User};
 use Doctrine\ORM\{EntityManagerInterface, NonUniqueResultException, NoResultException};
-use Faker\{Factory, Generator};
-use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Component\HttpFoundation\{Request, Response};
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-use Symfony\Contracts\HttpClient\ResponseInterface;
+use Symfony\Contracts\HttpClient\{Exception\TransportExceptionInterface, HttpClientInterface};
 
 final class EntitiesTest extends ApiTestCase
 {
     private EntityManagerInterface $em;
     private HttpClientInterface $client;
-    private bool $fixturesHaveBeenLoaded = false;
 
     /**
      * {@inheritDoc}
@@ -28,44 +24,32 @@ final class EntitiesTest extends ApiTestCase
     {
         $container = self::getContainer();
         $this->em = $container->get('doctrine')->getManager();
-        $databaseTool = $container->get(DatabaseToolCollection::class)->get();
-        $this->client = JsonAuthenticatorTest::login(asAdmin: false);
-        if (!$this->fixturesHaveBeenLoaded) {
-            $databaseTool->loadFixtures([
-                // Because ProjectFixtures need UserFixtures, UserFixtures are
-                // automatically loaded.
-                EntityFixtures::class
-            ]);
 
-            $this->fixturesHaveBeenLoaded = true;
-        }
+        $this->client = self::createClient(defaultOptions: [
+            'auth_bearer' => $container->get(JwtTokenGeneratorService::class)(asAdmin: false)
+        ]);
+
         parent::setUp();
     }
 
-    public function testCreateEntity(
-        string $entityName = 'test',
-        bool $asAdmin = false
-    ): ResponseInterface
+    /**
+     * @throws  TransportExceptionInterface
+     */
+    public function testCreate(): void
     {
-        $this->client = JsonAuthenticatorTest::login($asAdmin);
-
         $projectIri = $this->findIriBy(Project::class, [
-            'name' => $asAdmin ?
-                ProjectFixtures::ADMIN_PROJECT_NAME :
-                ProjectFixtures::USER_PROJECT_NAME_1
+            'name' => ProjectFixtures::USER_PROJECT_NAME_1
         ]);
 
-        $response = $this->client->request('POST', '/entities', [
+        $this->client->request('POST', '/entities', [
             'json' => [
-                'name' => $entityName,
+                'name' => 'testCreate',
                 'project' => $projectIri
             ]
         ]);
 
         self::assertResponseStatusCodeSame(Response::HTTP_CREATED);
         self::assertMatchesResourceItemJsonSchema(Entity::class);
-
-        return $response;
     }
 
     public function testUserCantAccessEntitiesFromProjectHeDoesNotOwn(): void
@@ -103,7 +87,7 @@ final class EntitiesTest extends ApiTestCase
 
     /**
      * It's useless to test this case if we can't create a simple entity
-     * @depends  testCreateEntity
+     * @depends  testCreate
      */
     public function testCreateAnEntityInAnotherUserProjectReturn404(): void
     {
@@ -129,29 +113,21 @@ final class EntitiesTest extends ApiTestCase
     // TODO: Check if the project of entity cannot be changed over time.
     //       (check serialization_group for PATCH)
 
-    public function testPartialUpdateEntity(): void
+    /**
+     * @throws  TransportExceptionInterface
+     */
+    public function testPartialUpdate(): void
     {
-        /** @var  Project  $projectFromFixtures */
-        $projectFromFixtures = $this->em->getRepository(Project::class)->findOneBy([
-            'name' => ProjectFixtures::USER_PROJECT_NAME_1
+        $entityIri = $this->findIriBy(Entity::class, [
+            'name' => EntityFixtures::USER_PROJECT_ENTITY_NAME
         ]);
 
-        $projectFromFixtures = $this->em->getReference(Project::class, $projectFromFixtures->getId());
-
-        $aNewEntity = (new Entity)
-            ->setName('test')
-            ->setProject($projectFromFixtures)
-        ;
-
-        $this->em->persist($aNewEntity);
-        $this->em->flush();
-
-        $this->client->request('PATCH', "/entities/{$aNewEntity->getSlug()}", [
+        $this->client->request('PATCH', $entityIri, [
             'headers' => [
                 'content-type' => 'application/merge-patch+json',
             ],
             'json' => [
-                'name' => 'anotherName'
+                'name' => 'testPartialUpdated'
             ]
         ]);
 
@@ -160,9 +136,9 @@ final class EntitiesTest extends ApiTestCase
     }
 
     /**
-     * @depends  testPartialUpdateEntity
+     * @depends  testPartialUpdate
      */
-    public function testEntityProjectCannotChangeOverTime(): void
+    public function testProjectCannotChangeOverTime(): void
     {
         /** @var  Project  $project */
         $project = $this->em->getRepository(Project::class)->findOneBy([
@@ -198,14 +174,29 @@ final class EntitiesTest extends ApiTestCase
     }
 
     /**
-     * @depends testCreateEntity
+     * @depends testCreate
      */
     public function testMaxEntitiesPerProject(): void
     {
-        $this->purgeUserProject();
+        /** @var  User  $user */
+        $user = $this->em->getRepository(User::class)->findOneBy([
+            'username' => UserFixtures::USER_USERNAME
+        ]);
+
+        $userReference = $this->em->getReference(User::class, $user->getId());
+
+        // 1. Create a project for testing
+        $projectName = 'testMaxEntitiesPerProject';
+        $projectForTesting = (new Project)
+            ->setName($projectName)
+            ->setUser($userReference);
+
+        $this->em->persist($projectForTesting);
+        $this->em->flush();
 
         $aUserProjectIri = $this->findIriBy(Project::class, [
-            'name' => ProjectFixtures::USER_PROJECT_NAME_1
+            'name' => $projectName,
+            'user' => $user->getId()
         ]);
 
         for ($i = 0; $i < Project::MAX_ENTITIES_PER_PROJECT; ++$i) {
@@ -234,9 +225,6 @@ final class EntitiesTest extends ApiTestCase
             'title' => 'An error occurred',
             'detail' => "project: The maximum number of Entity (". Project::MAX_ENTITIES_PER_PROJECT .") for this Project has been reached."
         ]);
-
-        // Revert the database to original state for the other tests.
-        $this->fixturesHaveBeenLoaded = false;
     }
 
     /**
@@ -278,30 +266,6 @@ final class EntitiesTest extends ApiTestCase
             ->execute();
 
         return true;
-    }
-
-    public function testNameWithNotOnlyAlphabeticalCharacter(): void
-    {
-        $this->client = JsonAuthenticatorTest::login(asAdmin: true);
-
-        $adminProjectIri = $this->findIriBy(Project::class, [
-            'name' => ProjectFixtures::ADMIN_PROJECT_NAME
-        ]);
-
-        $this->client->request('POST', '/entities', [
-            'json' => [
-                /** Entité contains é which is an accentued character */
-                'name' => 'Entité',
-                'project' => $adminProjectIri
-            ]
-        ]);
-
-        self::assertResponseStatusCodeSame(Response::HTTP_UNPROCESSABLE_ENTITY);
-        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
-        self::assertJsonContains([
-            'title' => 'An error occurred',
-            'detail' => "name: This value is not valid."
-        ]);
     }
 
     public function testDeleteAnEntity(): void

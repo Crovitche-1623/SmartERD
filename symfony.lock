@@ -19,6 +19,18 @@
     "composer/package-versions-deprecated": {
         "version": "1.11.99.4"
     },
+    "dama/doctrine-test-bundle": {
+        "version": "6.7",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "4.0",
+            "ref": "56eaa387b5e48ebcc7c95a893b47dfa1ad51449c"
+        },
+        "files": [
+            "config/packages/test/dama_doctrine_test_bundle.yaml"
+        ]
+    },
     "doctrine/annotations": {
         "version": "1.0",
         "recipe": {
@@ -153,9 +165,6 @@
             "config/packages/lexik_jwt_authentication.yaml"
         ]
     },
-    "liip/test-fixtures-bundle": {
-        "version": "2.0.0-beta1"
-    },
     "monolog/monolog": {
         "version": "2.3.4"
     },
@@ -226,9 +235,6 @@
             "phpunit.xml.dist",
             "tests/bootstrap.php"
         ]
-    },
-    "predis/predis": {
-        "version": "v1.1.7"
     },
     "psr/cache": {
         "version": "2.0.0"

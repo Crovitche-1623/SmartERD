@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
-use App\Entity\AbstractEntity;
 use App\Entity\SlugTrait;
+use App\Service\SlugGeneratorService;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\{Event\LifecycleEventArgs, Events};
-use Hidehalo\Nanoid\Client;
 
 /**
  * The goal of this listener is to generate a slug if the case the field is
@@ -30,17 +29,17 @@ final class GenerateSlugSubscriber implements EventSubscriber
 
     public function prePersist(LifecycleEventArgs $args): void
     {
-        $this->generateSlugIfNecessary($args->getEntity());
+        self::generateSlugIfNecessary($args->getEntity());
     }
 
     public function preUpdate(LifecycleEventArgs $args): void
     {
-        $this->generateSlugIfNecessary($args->getEntity());
+        self::generateSlugIfNecessary($args->getEntity());
     }
 
-    private function generateSlugIfNecessary($entity): void
+    private static function generateSlugIfNecessary($entity): void
     {
-        if (!$this->entityUseSlug($entity)) {
+        if (!self::entityUseSlug($entity)) {
             return;
         }
 
@@ -49,11 +48,15 @@ final class GenerateSlugSubscriber implements EventSubscriber
         }
     }
 
-    private function entityUseSlug(object $entity): bool
+    private static function entityUseSlug(object $entity): bool
     {
         $usedTraits = self::retrieveUsedTraits($entity);
 
-        return in_array(SlugTrait::class, $usedTraits);
+        return in_array(
+            needle: SlugTrait::class,
+            haystack: $usedTraits,
+            strict: true
+        );
     }
 
     private static function retrieveUsedTraits(object $class): array
@@ -73,6 +76,6 @@ final class GenerateSlugSubscriber implements EventSubscriber
 
     private static function generateSlug(): string
     {
-        return (new Client)->generateId(size: 21, mode: Client::MODE_DYNAMIC);
+        return (new SlugGeneratorService)();
     }
 }

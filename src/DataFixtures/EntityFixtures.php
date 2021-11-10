@@ -28,56 +28,46 @@ final class EntityFixtures extends BaseFixture implements
      */
     protected function loadData(ObjectManager $manager): void
     {
-        $uniquePart = ProjectFixtures::USER_PROJECT_NAME_1.' '.UserFixtures::USER_USERNAME;
-        /**
-         * @var  Project  $userProject
-         */
-        $userProject = $this->getSafeReference(Project::class, $uniquePart);
-        unset($uniquePart);
+        /** @var  Project  $userProject */
+        $userProject = $this->getSafeReference(Project::class,
+            ProjectFixtures::USER_PROJECT_NAME_1.' '.UserFixtures::USER_USERNAME
+        );
 
-        $entities = self::getEntitiesOfUserProject();
-        $total = count($entities);
-        for ($i = 0; $i < $total; ++$i) {
+        foreach (self::getEntitiesOfUserProject() as $entity) {
             $entity = (new Entity)
-                ->setName($entities[$i])
+                ->setName($entity)
                 ->setProject($userProject);
             $manager->persist($entity);
             $this->addSafeReference($entity);
         }
-        unset($total, $entities, $userProject);
 
-        $uniquePart = ProjectFixtures::ADMIN_PROJECT_NAME.' '.UserFixtures::ADMIN_USERNAME;
-        /**
-         * @var  Project  $adminProject
-         */
-        $adminProject = $this->getSafeReference(Project::class, $uniquePart);
-        unset($uniquePart);
+        /** @var  Project  $adminProject */
+        $adminProject = $this->getSafeReference(Project::class,
+            ProjectFixtures::ADMIN_PROJECT_NAME.' '.UserFixtures::ADMIN_USERNAME
+        );
 
-        $entities = self::getEntitiesOfAdminProject();
-        $total = count($entities);
-        for ($i = 0; $i < $total; ++$i) {
+        foreach (self::getEntitiesOfAdminProject() as $entity) {
             $entity = (new Entity)
-                ->setName($entities[$i])
+                ->setName($entity)
                 ->setProject($adminProject);
             $manager->persist($entity);
             $this->addSafeReference($entity);
         }
-        unset($total, $entities, $adminProject);
 
         $manager->flush();
     }
 
-    private static function getEntitiesOfUserProject(): array
+    private static function getEntitiesOfUserProject(): \Generator
     {
-        return [
+        yield from [
             self::USER_PROJECT_ENTITY_NAME,
             self::ANOTHER_USER_PROJECT_ENTITY_NAME,
             'Registration',
         ];
     }
 
-    private static function getEntitiesOfAdminProject(): array
+    private static function getEntitiesOfAdminProject(): \Generator
     {
-        return [self::ADMIN_PROJECT_ENTITY_NAME, 'Ingredients', 'Book'];
+        yield from [self::ADMIN_PROJECT_ENTITY_NAME, 'Ingredients', 'Book'];
     }
 }
