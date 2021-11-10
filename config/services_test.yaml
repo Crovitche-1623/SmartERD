@@ -1,6 +1,14 @@
+# @see https://symfony.com/doc/current/testing.html#retrieving-services-in-the-test
 services:
   test.validator: '@validator'
-
+  
+  test.jwt_manager: '@lexik_jwt_authentication.jwt_manager'
+  
+  App\Service\JwtTokenGeneratorService:
+      public: true
+      autowire: true
+      arguments:
+        - '@test.jwt_manager'
     # If you need to access services in a test, create an alias
     # and then fetch that alias from the container. As a convention,
     # aliases are prefixed with test. For example:

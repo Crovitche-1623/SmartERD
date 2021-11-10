@@ -27,7 +27,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     iri: 'https://schema.org/Person',
     itemOperations: [
         'get' => [
-            'security' => "is_granted('ROLE_ADMIN') or object.getId() == user.getId()",
+            'security' => "is_granted('ROLE_ADMIN') or object.getSlug() == user.getSlug()",
         ],
     ],
     denormalizationContext: [
@@ -262,7 +262,7 @@ class User extends AbstractEntity implements
         }
 
         if (array_key_exists('sub', $payload)) {
-            $user->setId((int) $payload['sub']);
+            $user->setSlug($payload['sub']);
         }
 
         return $user;

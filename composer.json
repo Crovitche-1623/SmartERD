@@ -30,7 +30,6 @@
     "lexik/jwt-authentication-bundle": "^2.6",
     "nelmio/cors-bundle": "^2.1",
     "phpdocumentor/reflection-docblock": "^5.2",
-    "predis/predis": "^1.1",
     "symfony/asset": "5.3.*",
     "symfony/cache": "5.3.*",
     "symfony/config": "5.3.*",
@@ -58,12 +57,12 @@
     "symfony/yaml": "5.3.*"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-latest",
+    "dama/doctrine-test-bundle": "^6.7",
     "doctrine/doctrine-fixtures-bundle": "^3.3",
     "fakerphp/faker": "^1.15",
     "justinrainbow/json-schema": "^5.2",
-    "liip/test-fixtures-bundle": "2.1.0-alpha1",
     "phpunit/phpunit": "^9.5",
+    "roave/security-advisories": "dev-latest",
     "symfony/browser-kit": "5.3.*",
     "symfony/css-selector": "^5.3",
     "symfony/http-client": "5.3.*",

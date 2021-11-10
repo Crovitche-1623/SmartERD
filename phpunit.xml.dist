@@ -6,6 +6,7 @@
          backupGlobals="false"
          colors="true"
          bootstrap="tests/bootstrap.php"
+         cacheResultFile="var/.phpunit.result.cache"
          convertDeprecationsToExceptions="false"
 >
     <php>
@@ -39,4 +40,9 @@
         <extension class="Symfony\Component\Panther\ServerExtension" />
     </extensions>
     -->
+
+    <!-- This extension wrap every test in a transaction to speed up things -->
+    <extensions>
+        <extension class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
+    </extensions>
 </phpunit>

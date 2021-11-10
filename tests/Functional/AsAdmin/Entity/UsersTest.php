@@ -2,14 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Functional\Entity;
+namespace App\Tests\Functional\AsAdmin\Entity;
 
 use ApiPlatform\Core\Bridge\Symfony\Bundle\Test\ApiTestCase;
 use App\DataFixtures\UserFixtures;
 use App\Entity\User;
-use App\Tests\Functional\Security\JsonAuthenticatorTest;
-use Doctrine\ORM\EntityManagerInterface;
-use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
+use App\Service\JwtTokenGeneratorService;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -17,23 +15,17 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 final class UsersTest extends ApiTestCase
 {
     private HttpClientInterface $client;
-    private bool $fixturesHaveBeenLoaded = false;
 
     /**
      * {@inheritDoc}
      */
     protected function setUp(): void
     {
-        $databaseTool = self::getContainer()->get(DatabaseToolCollection::class)->get();
-        $this->client = JsonAuthenticatorTest::login(asAdmin: true);
+        $container = self::getContainer();
 
-        if (!$this->fixturesHaveBeenLoaded) {
-            $databaseTool->loadFixtures([
-                UserFixtures::class
-            ]);
-
-            $this->fixturesHaveBeenLoaded = true;
-        }
+        $this->client = self::createClient(defaultOptions: [
+            'auth_bearer' => $container->get(JwtTokenGeneratorService::class)(asAdmin: true)
+        ]);
 
         parent::setUp();
     }
@@ -50,18 +42,6 @@ final class UsersTest extends ApiTestCase
         self::assertMatchesResourceItemJsonSchema(User::class);
     }
 
-    /**
-     * @throws  TransportExceptionInterface
-     */
-    public function testCreateAsUser(): void
-    {
-        $this->client = JsonAuthenticatorTest::login(asAdmin: false);
-
-        $this->createUser();
-
-        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
-        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
-    }
 
     /**
      * @throws  TransportExceptionInterface
@@ -69,33 +49,6 @@ final class UsersTest extends ApiTestCase
     public function testAdminAccessUserAccount(): void
     {
         $this->getUser();
-
-        self::assertResponseIsSuccessful();
-        self::assertResponseHeaderSame('content-type', "application/ld+json; charset=utf-8");
-        self::assertMatchesResourceItemJsonSchema(User::class);
-    }
-
-    /**
-     * @throws  TransportExceptionInterface
-     */
-    public function testUserAccessOtherUserAccount(): void
-    {
-        $this->client = JsonAuthenticatorTest::login(asAdmin: false);
-
-        $this->getUser();
-
-        self::assertResponseStatusCodeSame(Response::HTTP_FORBIDDEN);
-        self::assertResponseHeaderSame('Content-Type', 'application/problem+json; charset=utf-8');
-    }
-
-    /**
-     * @throws  TransportExceptionInterface
-     */
-    public function testUserAccessHisAccount(): void
-    {
-        $this->client = JsonAuthenticatorTest::login(asAdmin: false);
-
-        $this->getUser(UserFixtures::USER_USERNAME);
 
         self::assertResponseIsSuccessful();
         self::assertResponseHeaderSame('content-type', "application/ld+json; charset=utf-8");

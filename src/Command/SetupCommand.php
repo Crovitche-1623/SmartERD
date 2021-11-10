@@ -4,17 +4,22 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\{ArrayInput, InputInterface};
 use Symfony\Component\Console\Output\{NullOutput, OutputInterface};
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 final class SetupCommand extends Command
 {
     protected static $defaultName = 'app:setup';
     private string $jwtConfigDir;
 
-    public function __construct(string $projectDirectory)
+    public function __construct(
+        string $projectDirectory,
+        private KernelInterface $kernel
+    )
     {
         parent::__construct(self::$defaultName);
         $this->jwtConfigDir = $projectDirectory . '/config/jwt';
@@ -38,12 +43,21 @@ final class SetupCommand extends Command
     /**
      * {@inheritDoc}
      */
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(
+        InputInterface $input,
+        OutputInterface $output
+    ): int
     {
         // TODO: Add Lock to avoid concurrent run
         $io = new SymfonyStyle($input, $output);
         $io->title('SmartERD - Installation assistant');
+        $io->warning('This command should not be executed in production !');
         $io->warning('Database suppression...');
+
+        if (!$this->getApplication()) {
+            $this->setApplication(new Application($this->kernel));
+        }
+
         $returnCode = $this->getApplication()
             ->get('doctrine:database:drop')
             ->run(new ArrayInput([
@@ -118,16 +132,6 @@ final class SetupCommand extends Command
 
         if (0 === $returnCode) {
             $io->success('The Symfony cache has been cleared');
-
-            $io->warning('Clearing Doctrine Metadata cache...');
-            $returnCode = $this
-                ->getApplication()
-                ->get('doctrine:cache:clear-metadata')
-                ->run(new ArrayInput([]), new NullOutput);
-        }
-
-        if (0 === $returnCode) {
-            $io->success('The Doctrine Metadata cache has been cleared');
 
             $io->warning('Clearing Doctrine Query cache...');
             $returnCode = $this

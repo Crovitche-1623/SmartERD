@@ -61,8 +61,9 @@ final class EntitiesBelongingToProjectOfCurrentUserExtension implements
         $rootAlias = $queryBuilder->getRootAliases()[0];
         $queryBuilder
             ->innerJoin(sprintf('%s.project', $rootAlias), 'p')
-            ->andWhere('p.user = :current_user')
-            ->setParameter('current_user', $user->getId())
+            ->innerJoin('p.user', 'u')
+            ->andWhere('u.slug = :slug')
+            ->setParameter('slug', $user->getSlug())
         ;
     }
 }

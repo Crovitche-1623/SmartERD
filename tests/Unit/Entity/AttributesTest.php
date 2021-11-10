@@ -5,12 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Entity;
 
 use App\DataFixtures\EntityFixtures;
-use App\Validator\MaxEntries;
 use App\Validator\NoHolesInPosition;
 use App\Validator\Position;
 use App\Entity\{Attribute, Entity};
 use Doctrine\ORM\EntityManagerInterface;
-use Liip\TestFixturesBundle\Services\DatabaseToolCollection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -18,7 +16,6 @@ final class AttributesTest extends KernelTestCase
 {
     private EntityManagerInterface $entityManager;
     private ValidatorInterface $validator;
-    private bool $fixturesHaveBeenLoaded = false;
 
     /**
      * {@inheritDoc}
@@ -32,32 +29,23 @@ final class AttributesTest extends KernelTestCase
         $validator = $container->get('test.validator');
         $this->validator = $validator;
 
-        $databaseTool = $container->get(DatabaseToolCollection::class)->get();
-        if (!$this->fixturesHaveBeenLoaded) {
-            $databaseTool->loadFixtures([
-                // Because ProjectFixtures need UserFixtures, UserFixtures are
-                // automatically loaded.
-                EntityFixtures::class
-            ]);
-
-            $this->fixturesHaveBeenLoaded = true;
-        }
-
         parent::setUp();
     }
 
     public function testSortablePosition(): void
     {
-        $entity = $this->getEntityReference();
+        // 1. Get an entity that doesn't have attributes
+        $entity = $this->getEntityReference(EntityFixtures::ANOTHER_USER_PROJECT_ENTITY_NAME);
 
-        $attributeOne = new Attribute;
-        $attributeOne->setName('AttributeOne');
-        $attributeOne->setEntity($entity);
+        // 2. Insert two attributes and check if the positions are corrects.
+        $attributeOne = (new Attribute)
+            ->setName('AttributeOne')
+            ->setEntity($entity);
         $this->entityManager->persist($attributeOne);
 
-        $attributeTwo = new Attribute;
-        $attributeTwo->setName('AttributeTwo');
-        $attributeTwo->setEntity($entity);
+        $attributeTwo = (new Attribute)
+            ->setName('AttributeTwo')
+            ->setEntity($entity);
         $this->entityManager->persist($attributeTwo);
 
         $this->entityManager->flush();
@@ -73,7 +61,7 @@ final class AttributesTest extends KernelTestCase
     {
         $attribute = new Attribute;
         $attribute->setName('Attribute');
-        $attribute->setEntity($this->getEntityReference());
+        $attribute->setEntity($this->getEntityReference(EntityFixtures::ANOTHER_USER_PROJECT_ENTITY_NAME));
         $attribute->setPosition(127);
 
         $violations = $this->validator->validate($attribute);
@@ -94,7 +82,7 @@ final class AttributesTest extends KernelTestCase
     public function testPushAttributeAtTheEnd(): void
     {
         $numberOfAttributes = 10;
-        $entity = $this->getEntityReference();
+        $entity = $this->getEntityReference(EntityFixtures::ANOTHER_USER_PROJECT_ENTITY_NAME);
         $this->createAttributes($entity, $numberOfAttributes);
 
         $attribute = new Attribute;
@@ -135,7 +123,7 @@ final class AttributesTest extends KernelTestCase
 
     public function testPositionsAreRecalculatedIfAnAttributeIsDeleted(): void
     {
-        $entity = $this->getEntityReference();
+        $entity = $this->getEntityReference(EntityFixtures::ANOTHER_USER_PROJECT_ENTITY_NAME);
         $this->createAttributes($entity, 3);
 
         /** @var  Attribute  $firstAttribute */
@@ -172,8 +160,9 @@ final class AttributesTest extends KernelTestCase
         $this->entityManager->persist($attributeInEntityTwo);
         $this->entityManager->flush();
 
-        self::assertEquals(0, $attributeInEntityOne->getPosition());
-        self::assertEquals(0, $attributeInEntityOne->getPosition());
+        // There is already two attributes (positions 0,1) in the first entity.
+        self::assertEquals(2, $attributeInEntityOne->getPosition());
+        self::assertEquals(0, $attributeInEntityTwo->getPosition());
     }
 
     public function testPositionsAreRecalculatedWhenAttributeIsSetAtBeginning(): void
@@ -236,8 +225,8 @@ final class AttributesTest extends KernelTestCase
 
     private function getEntityReference(string $name = EntityFixtures::USER_PROJECT_ENTITY_NAME): Entity
     {
-        $entityRepository = $this->entityManager->getRepository(Entity::class);
-
-        return $entityRepository->findOneBy(['name' => $name]);
+        return $this->entityManager->getRepository(Entity::class)->findOneBy([
+            'name' => $name
+        ]);
     }
 }

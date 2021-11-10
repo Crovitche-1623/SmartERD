@@ -56,16 +56,25 @@ final class EntityVoter extends Voter
         return false;
     }
 
+    /**
+     * @throws  \Exception
+     */
     private function canView(Entity $entity, User $currentUser): bool
     {
         // User can view the entity only if the entity belongs to a project he
         // own.
+        $userProject = $entity->getProject();
+
+        if (!$userProject) {
+            throw new \Exception('Entity project is missing. Does the fetch eager is enabled ?');
+        }
+
         /**
          * @var  User  $user
          */
-        $user = $entity->getProject()->getUser();
+        $user = $userProject->getUser();
 
-        if ($user->getId() === $currentUser->getId()) {
+        if ($user->getSlug() === $currentUser->getSlug()) {
             return true;
         }
 
