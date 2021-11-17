@@ -66,17 +66,11 @@ final class AttributesTest extends KernelTestCase
 
         $violations = $this->validator->validate($attribute);
 
-        $errors = (string) $violations;
-
-        $expectedError = str_replace(
-            ['{{ lastPosition }}', '{{ givenPosition }}'],
-            [0, 127],
-            NoHolesInPosition::MESSAGE
-        );
-
         self::assertCount(1, $violations);
-        self::assertStringContainsString($expectedError, $errors);
-
+        self::assertStringContainsString(
+            needle: NoHolesInPosition::MESSAGE_IF_NO_OTHER_ATTRIBUTES,
+            haystack: (string) $violations
+        );
     }
 
     public function testPushAttributeAtTheEnd(): void

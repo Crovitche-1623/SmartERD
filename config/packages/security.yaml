@@ -47,6 +47,5 @@ security:
     # Note: Only the *first* access control that matches will be used
     access_control:
         - { path: ^/docs, roles: PUBLIC_ACCESS } # Allows accessing the Swagger UI
-        - { path: ^/login, roles: PUBLIC_ACCESS }
-        - { path: ^/test, roles: PUBLIC_ACCESS } # TODO: Remove it in production
+        - { path: ^/login_check, roles: PUBLIC_ACCESS }
         - { path: ^/, roles: IS_AUTHENTICATED_FULLY }

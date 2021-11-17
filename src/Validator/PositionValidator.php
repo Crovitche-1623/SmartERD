@@ -75,7 +75,8 @@ final class PositionValidator extends ConstraintValidator
 
         try {
             // We add +1 because position start at 0.
-            $entriesCount = (int) $query->getSingleScalarResult() + 1;
+            /** @var  int  $entriesCount */
+            $entriesCount = $query->getSingleScalarResult() + 1;
 
         } catch (NoResultException|NonUniqueResultException) {
             $this->context->buildViolation('Request server side is wrong formatted. Please contact the website administrator.')
