@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Validator;
 
-use Doctrine\ORM\{EntityManagerInterface, NoResultException};
+use App\Entity\SlugInterface;
+use Doctrine\ORM\{EntityManagerInterface, NonUniqueResultException, NoResultException};
 use Symfony\Component\{Validator\Constraint, Validator\ConstraintValidator};
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
@@ -16,6 +17,12 @@ final class MaxEntriesValidator extends ConstraintValidator
     public function __construct(private EntityManagerInterface $entityManager)
     {}
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws  NonUniqueResultException
+     * @throws  \ReflectionException
+     */
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof MaxEntries) {
@@ -33,20 +40,38 @@ final class MaxEntriesValidator extends ConstraintValidator
             throw new UnexpectedTypeException($value, 'object');
         }
 
-        $property = $this->context->getPropertyName();
+        if (!($value instanceof SlugInterface)) {
+            throw new UnexpectedTypeException($value, SlugInterface::class);
+        }
+        /** @var  SlugInterface   $value */
+
+        $property = !$this->context->getPropertyName() ?
+            $constraint->property :
+            $this->context->getPropertyName();
+
+        if (!$this->context->getObject()) {
+            throw new \UnexpectedValueException('The current context validated must be an object');
+        }
 
         $parentFqdn = get_class($this->context->getObject());
 
         $query = $this->entityManager->createQuery(/** @lang DQL */"
-            SELECT COUNT(c0.id) FROM $parentFqdn c0 WHERE c0.$property = :id
+            SELECT
+                COUNT(c0.id)
+            FROM
+                $parentFqdn c0
+                JOIN c0.$property d1
+            WHERE
+                d1.slug = :slug
         ");
 
-        $query->setParameter('id', $value->getId());
+        $query->setParameter('slug', $value->getSlug());
 
         $childShortName = (new \ReflectionClass(get_class($value)))->getShortName();
 
         try {
-            $entriesCount = (int) $query->getSingleScalarResult();
+            /** @var  int  $entriesCount */
+            $entriesCount = $query->getSingleScalarResult();
 
             if ($entriesCount >= $constraint->max) {
                 $this->context->buildViolation($constraint::MESSAGE)

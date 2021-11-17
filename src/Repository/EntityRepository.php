@@ -8,6 +8,9 @@ use App\Entity\Entity;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @template-extends  ServiceEntityRepository<Entity>
+ */
 final class EntityRepository extends ServiceEntityRepository
 {
     /**

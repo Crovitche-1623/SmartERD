@@ -14,6 +14,7 @@ use JetBrains\PhpStorm\Pure;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
+use App\Validator\Constraints\Project as ProjectAssert;
 
 #[ORM\Entity(ProjectRepository::class), ORM\Table('SERD_Projects')]
 #[ORM\UniqueConstraint('uniq___project___name__user', ['name', 'user_id'])]
@@ -53,7 +54,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     ],
     normalizationContext: ['groups' => 'project:read'],
 )]
-class Project extends AbstractEntity
+class Project extends AbstractEntity implements SlugInterface
 {
     use SlugTrait;
 
@@ -69,19 +70,22 @@ class Project extends AbstractEntity
 
     #[ORM\ManyToOne(User::class, fetch: 'EAGER', inversedBy: 'projects')]
     #[ORM\JoinColumn(nullable: false)]
-    #[CustomAssert\MaxEntries(User::MAX_PROJECTS_PER_USER)]
+
+    #[Assert\DisableAutoMapping]
+    #[ProjectAssert\ProjectUserRequirements]
     #[ApiProperty(security: "is_granted('ROLE_ADMIN')")]
     #[Groups(['project:read', 'project:details'])]
     private ?User $user = null;
 
-    // Note: This validation only apply when entities are persisted from a
-    //       project.
+    /** @var  Collection<int, Entity> */
     #[ORM\OneToMany(
         mappedBy: "project",
         targetEntity: Entity::class,
         orphanRemoval: true
     )]
     #[Groups('project:details')]
+    // Note: This validation only apply when entities are persisted from a
+    //       project.
     #[Assert\Count(
         max: self::MAX_ENTITIES_PER_PROJECT,
         maxMessage: 'You cannot have more than {{ limit }} entities'
@@ -96,7 +100,7 @@ class Project extends AbstractEntity
 
     public function __toString(): string
     {
-        return $this->name;
+        return (string) $this->name;
     }
 
     /**
@@ -105,7 +109,7 @@ class Project extends AbstractEntity
     #[Pure]
     public function toUniqueString(): string
     {
-        return $this->getName().' '.$this->user->getUsername();
+        return $this->getName().' '.$this->user?->getUsername();
     }
 
     public function getName(): ?string

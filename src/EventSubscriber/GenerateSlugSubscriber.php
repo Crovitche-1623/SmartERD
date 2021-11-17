@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\EventSubscriber;
 
+use App\Entity\SlugInterface;
 use App\Entity\SlugTrait;
 use App\Service\SlugGeneratorService;
 use Doctrine\Common\EventSubscriber;
@@ -37,12 +38,13 @@ final class GenerateSlugSubscriber implements EventSubscriber
         self::generateSlugIfNecessary($args->getEntity());
     }
 
-    private static function generateSlugIfNecessary($entity): void
+    private static function generateSlugIfNecessary(object $entity): void
     {
         if (!self::entityUseSlug($entity)) {
             return;
         }
 
+        /** @var  SlugInterface  $entity */
         if (null === $entity->getSlug()) {
             $entity->setSlug(self::generateSlug());
         }
@@ -59,15 +61,20 @@ final class GenerateSlugSubscriber implements EventSubscriber
         );
     }
 
+    /**
+     * @return  array<string, string>
+     */
     private static function retrieveUsedTraits(object $class): array
     {
         $traits = [];
 
         do {
+            /** @phpstan-ignore-next-line  */
             $traits = array_merge(class_uses($class, true), $traits);
         } while ($class = get_parent_class($class));
 
         foreach ($traits as $trait => $same) {
+            /** @phpstan-ignore-next-line  */
             $traits = array_merge(class_uses($trait, true), $traits);
         }
 

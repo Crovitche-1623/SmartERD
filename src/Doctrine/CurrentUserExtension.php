@@ -42,6 +42,9 @@ final class CurrentUserExtension implements
      * Modify the DQL Query (used to create the item) by adding a where
      * condition to check if the owner is the current user or has the
      * "ROLE_ADMIN" role.
+     *
+     * @param  array<string, string|bool|null>  $context
+     * @param  array<string, string>  $identifiers
      */
     public function applyToItem(
         QueryBuilder $queryBuilder,

@@ -39,7 +39,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class User extends AbstractEntity implements
     UserInterface,
     JWTUserInterface,
-    PasswordAuthenticatedUserInterface
+    PasswordAuthenticatedUserInterface,
+    SlugInterface
 {
     use SlugTrait;
 
@@ -72,6 +73,7 @@ class User extends AbstractEntity implements
     #[Groups(['user:read', 'user:create'])]
     private ?string $email = null;
 
+    /** @var  Collection<int, Project> */
     #[ORM\OneToMany('user', Project::class, orphanRemoval: true)]
     #[Groups(['user:read'])]
     private Collection $projects;
@@ -250,6 +252,8 @@ class User extends AbstractEntity implements
      * Create a new instance of this entity from the JWT Payload. Because the
      * payload of JWT cannot contain sensitive information. Method like
      * getHashedPassword WILL ALWAYS return null.
+     *
+     * @param  array<string, null|int|string|bool|array<int, string>>  $payload
      */
     public static function createFromPayload($username, array $payload): self
     {
@@ -258,11 +262,17 @@ class User extends AbstractEntity implements
         $user->setUsername($username);
 
         if (array_key_exists('roles', $payload)) {
-            $user->setRoles($payload['roles']);
+            /** @var  array<int, string>  $roles */
+            $roles = $payload['roles'];
+
+            $user->setRoles($roles);
         }
 
         if (array_key_exists('sub', $payload)) {
-            $user->setSlug($payload['sub']);
+            /** @var  string  $sub */
+            $sub = $payload['sub'];
+
+            $user->setSlug($sub);
         }
 
         return $user;

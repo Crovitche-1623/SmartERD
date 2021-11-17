@@ -36,7 +36,7 @@ use Symfony\Component\Validator\Constraints as Assert;
     normalizationContext: ['groups' => 'entity:read'],
 )]
 #[Assert\EnableAutoMapping]
-class Entity extends AbstractEntity
+class Entity extends AbstractEntity implements SlugInterface
 {
     use SlugTrait;
 
@@ -61,6 +61,7 @@ class Entity extends AbstractEntity
     #[Assert\Regex('/^[a-z]+$/i', htmlPattern: '^[a-zA-Z]+$')]
     private ?string $name = null;
 
+    /** @var  Collection<int, Attribute> */
     #[ORM\OneToMany('entity', Attribute::class, orphanRemoval: true)]
     #[ORM\OrderBy(['position' => 'ASC'])]
     #[Groups('project:details')]
@@ -84,7 +85,7 @@ class Entity extends AbstractEntity
     #[Pure]
     public function toUniqueString(): string
     {
-        return $this->getName().' '.$this->project->getName();
+        return $this->getName().' '.$this->project?->getName();
     }
 
     public function getProject(): ?Project

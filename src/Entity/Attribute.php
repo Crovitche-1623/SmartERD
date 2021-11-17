@@ -29,7 +29,7 @@ use App\Validator as CustomAssert;
     ],
     normalizationContext: ['groups' => 'attribute:read'],
 )]
-class Attribute extends AbstractEntity
+class Attribute extends AbstractEntity implements SlugInterface
 {
     use SlugTrait;
 
@@ -102,6 +102,6 @@ class Attribute extends AbstractEntity
     #[Pure]
     public function toUniqueString(): string
     {
-        return $this->__toString() . ' ' . $this->entity->toUniqueString();
+        return $this->__toString() . ' ' . $this->entity?->toUniqueString();
     }
 }

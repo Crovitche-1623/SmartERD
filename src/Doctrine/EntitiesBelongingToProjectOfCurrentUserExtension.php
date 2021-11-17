@@ -24,7 +24,7 @@ final class EntitiesBelongingToProjectOfCurrentUserExtension implements
     public function __construct(private Security $security)
     {}
 
-    /*
+    /**
      * This method check if the resource class parameter does not match the
      * Entity class then it checks if the current user is an administrator or
      * if the user is not logged.
@@ -32,6 +32,9 @@ final class EntitiesBelongingToProjectOfCurrentUserExtension implements
      * executed.
      * Then it adds a where condition to the query to have only the projects of
      * current user.
+     *
+     * @param  array<string, string|bool|null>  $context
+     * @param  array<string, string>  $identifiers
      */
     public function applyToItem(
         QueryBuilder $queryBuilder,

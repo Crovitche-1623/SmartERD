@@ -11,6 +11,9 @@ use Doctrine\ORM\{OptimisticLockException,ORMException};
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\{PasswordUpgraderInterface, UserInterface};
 
+/**
+ * @template-extends  ServiceEntityRepository<User>
+ */
 final class UserRepository extends ServiceEntityRepository implements
     PasswordUpgraderInterface
 {

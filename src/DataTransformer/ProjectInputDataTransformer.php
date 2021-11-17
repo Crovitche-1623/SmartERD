@@ -24,6 +24,7 @@ final class ProjectInputDataTransformer implements DataTransformerInterface
      * {@inheritDoc}
      *
      * @param  ProjectInput  $object
+     * @param  array<string, bool|string|array<array-key, string>|null|string>  $context
      */
     public function transform($object, string $to, array $context = []): Project
     {
@@ -55,6 +56,10 @@ final class ProjectInputDataTransformer implements DataTransformerInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @param  object  $data  /!\ Data can be an array too but PHPStan is angry
+     *                            if the array is not typed.
+     * @param  array<string, array<int|string, string>|string|bool|null>  $context
      */
     public function supportsTransformation(
         $data,
@@ -67,9 +72,12 @@ final class ProjectInputDataTransformer implements DataTransformerInterface
             return false;
         }
 
-        // Check if the book is the desired target and if the input is
+        // Check if the project is the desired target and if the input is
         // configured
+        /** @var array<string, string|null>  $input */
+        $input = $context['input'];
+        $inputClass = $input['class'];
         return Project::class === $to &&
-               null !== ($context['input']['class'] ?? null);
+               null !== ($inputClass ?? null);
     }
 }

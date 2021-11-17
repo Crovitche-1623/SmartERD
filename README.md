@@ -1,10 +1,10 @@
 # SmartERD
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Crovitche-1623/SmartERD/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Crovitche-1623/SmartERD/?branch=master)
+![PHPStan level](https://img.shields.io/badge/PHPStan-level%209-brightgreen.svg?style=flat)
 
 SmartERD is a Symfony project designed to create Entity Relationship Diagrams. 
 These are used to have a model of the database while ignoring the RDBMS used.
 
-***Disclaimer: SmartERD is still in development mode.***
+***Disclaimer: SmartERD is still under active development.***
 
 ## Setup
  0. If not already done, [install Docker Compose](https://docs.docker.com/compose/install/)

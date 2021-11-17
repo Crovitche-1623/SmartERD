@@ -25,7 +25,10 @@ final class NoHolesInPositionValidator extends ConstraintValidator
     public function validate($value, Constraint $constraint): void
     {
         if (!$constraint instanceof NoHolesInPosition) {
-            throw new UnexpectedTypeException($constraint, NoHolesInPosition::class);
+            throw new UnexpectedTypeException(
+                value: $constraint,
+                expectedType: NoHolesInPosition::class
+            );
         }
 
         if (!is_int($value)) {
@@ -37,6 +40,7 @@ final class NoHolesInPositionValidator extends ConstraintValidator
         if (!($parentFqdnObject = $this->context->getObject())) {
             throw new UnexpectedTypeException($parentFqdnObject, 'object');
         }
+        /** @var  object  $parentFqdnObject */
 
         $queryBuilder = $this->entityManager->createQueryBuilder()
             ->select('MAX(c0.position)')
@@ -54,7 +58,9 @@ final class NoHolesInPositionValidator extends ConstraintValidator
         $query = $queryBuilder->getQuery();
 
         try {
-            $lastPosition = (int) $query->getSingleScalarResult();
+            /** @var  int  $lastPosition */
+            $lastPosition = $query->getSingleScalarResult();
+
         } catch (NoResultException) {
             if ($givenPositon > 0) {
                 $this->context->buildViolation("You can't set the position higher than 0 because it'll create holes in positions.")
@@ -70,6 +76,13 @@ final class NoHolesInPositionValidator extends ConstraintValidator
         }
 
         if ($givenPositon < $lastPosition + 1) {
+            return;
+        }
+
+        if (!$lastPosition) {
+            $this->context
+                ->buildViolation($constraint::MESSAGE_IF_NO_OTHER_ATTRIBUTES)
+                ->addViolation();
             return;
         }
 

@@ -13,6 +13,7 @@ use Symfony\Component\Validator\Constraint;
 final class NoHolesInPosition extends Constraint
 {
     public const MESSAGE = "You can't set the position greater than 1 from the last one. Last position is {{ lastPosition }}, position given is {{ givenPosition }}";
+    public const MESSAGE_IF_NO_OTHER_ATTRIBUTES = "You have specified a position but there are no other data so please don't specify any position";
 
     public function __construct(
         public ?string $sortableGroupProperty,

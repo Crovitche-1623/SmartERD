@@ -30,9 +30,9 @@ trait SlugTrait
      * @param  string|null  $slug  Null can be set if you want the slug to be
      *                             redefined.
      *
-     * @return  $this
+     * @return  SlugInterface
      */
-    public function setSlug(?string $slug): self
+    public function setSlug(?string $slug): SlugInterface
     {
         $this->slug = $slug;
 

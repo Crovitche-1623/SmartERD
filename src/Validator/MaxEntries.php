@@ -16,11 +16,13 @@ use Symfony\Component\Validator\Constraint;
 
     public function __construct(
         public int $max,
+        public ?string $property = null,
         array $groups = null,
         mixed $payload = null
     )
     {
         $options['max'] = $this->max;
+        $options['property'] = $this->property;
         parent::__construct($options, $groups, $payload);
     }
 

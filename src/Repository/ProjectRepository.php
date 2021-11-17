@@ -11,6 +11,9 @@ use Doctrine\ORM\Tools\Pagination\Paginator as DoctrinePaginator;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * @template-extends  ServiceEntityRepository<Project>
+ */
 final class ProjectRepository extends ServiceEntityRepository
 {
     public const ITEM_PER_PAGE = 20;
@@ -26,9 +29,10 @@ final class ProjectRepository extends ServiceEntityRepository
     public function findOneByUserAndName(
         UserInterface $user,
         string $projectName
-    ): Project
+    ): ?Project
     {
-        return $this->_em->createQuery('
+        /** @var  Project|null  $project */
+        $project = $this->_em->createQuery('
             SELECT
                 p0
             FROM
@@ -38,16 +42,17 @@ final class ProjectRepository extends ServiceEntityRepository
                 u1.username = :username AND
                 p0.name = :projectName
         ')
-        ->setParameter('username', $user->getUsername())
-        ->setParameter('projectName', $projectName)
-        ->getOneOrNullResult();
+            ->setParameter('username', $user->getUsername())
+            ->setParameter('projectName', $projectName)
+            ->getOneOrNullResult();
+        return $project;
     }
 
     /**
      * @param  int  $userId
      * @param  int  $page
      *
-     * @return  Paginator  @see https://api-platform.com/docs/core/pagination/#custom-controller-action
+     * @return  Paginator<Project>  @see https://api-platform.com/docs/core/pagination/#custom-controller-action
      */
     public function findByUserId(int $userId, int $page = 1): Paginator
     {

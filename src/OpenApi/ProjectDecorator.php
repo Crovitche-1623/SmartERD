@@ -21,6 +21,8 @@ final class ProjectDecorator implements OpenApiFactoryInterface
 
     /**
      * {@inheritDoc}
+     *
+     * @phpstan-ignore-next-line  FIXME: Don't know how to debug this method
      */
     public function __invoke(array $context = []): OpenApi
     {

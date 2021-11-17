@@ -13,6 +13,7 @@ use Symfony\Component\HttpKernel\KernelInterface;
 
 final class SetupCommand extends Command
 {
+    /** @var  string  $defaultName */
     protected static $defaultName = 'app:setup';
     private string $jwtConfigDir;
 
@@ -54,11 +55,13 @@ final class SetupCommand extends Command
         $io->warning('This command should not be executed in production !');
         $io->warning('Database suppression...');
 
-        if (!$this->getApplication()) {
-            $this->setApplication(new Application($this->kernel));
+        $application = $this->getApplication();
+        if (!$application) {
+            $application = new Application($this->kernel);
+            $this->setApplication($application);
         }
 
-        $returnCode = $this->getApplication()
+        $returnCode = $application
             ->get('doctrine:database:drop')
             ->run(new ArrayInput([
                 '--if-exists' => true,
@@ -69,8 +72,7 @@ final class SetupCommand extends Command
             $io->success('The database has been deleted');
 
             $io->warning('Database creation...');
-            $returnCode = $this
-                ->getApplication()
+            $returnCode = $application
                 ->get('doctrine:database:create')
                 ->run(new ArrayInput([]), new NullOutput)
             ;
@@ -81,14 +83,14 @@ final class SetupCommand extends Command
             $io->success('The database has been created');
 
             $io->warning('Database schema creation...');
-            $returnCode = $this
-                ->getApplication()
+            $returnCode = $application
                 ->get('doctrine:schema:create')
                 ->run(new ArrayInput([]), new NullOutput)
             ;
         }
 
         if (0 === $returnCode) {
+            /** @var  \OpenSSLAsymmetricKey  $privateKey */
             $privateKey = openssl_pkey_new([
                 'private_key_type' => OPENSSL_KEYTYPE_RSA,
                 'private_key_bits' => 4096
@@ -98,7 +100,10 @@ final class SetupCommand extends Command
 
             openssl_pkey_export_to_file($privateKey, $privateKeyFileName);
 
-            $publicKey = openssl_pkey_get_details($privateKey)['key'];
+            /** @var  array<string, int|string|array<string, string>>  $privateKeyDetails */
+            $privateKeyDetails = openssl_pkey_get_details($privateKey);
+
+            $publicKey = $privateKeyDetails['key'];
 
             file_put_contents($this->jwtConfigDir . '/public.pem', $publicKey);
 
@@ -114,8 +119,7 @@ final class SetupCommand extends Command
                 '--purge-with-truncate' => true
             ]);
             $args->setInteractive(false);
-            $returnCode = $this
-                ->getApplication()
+            $returnCode = $application
                 ->get('doctrine:fixtures:load')
                 ->run($args, new NullOutput);
         }
@@ -124,8 +128,7 @@ final class SetupCommand extends Command
             $io->success('The data has been created');
 
             $io->warning('Clearing Symfony cache...');
-            $returnCode = $this
-                ->getApplication()
+            $returnCode = $application
                 ->get('cache:clear')
                 ->run(new ArrayInput([]), new NullOutput);
         }
@@ -134,8 +137,7 @@ final class SetupCommand extends Command
             $io->success('The Symfony cache has been cleared');
 
             $io->warning('Clearing Doctrine Query cache...');
-            $returnCode = $this
-                ->getApplication()
+            $returnCode = $application
                 ->get('doctrine:cache:clear-query')
                 ->run(new ArrayInput([]), new NullOutput);
         }
@@ -144,8 +146,7 @@ final class SetupCommand extends Command
             $io->success('The Doctrine Query cache has been cleared');
 
             $io->warning('Clearing Doctrine Result cache...');
-            $returnCode = $this
-                ->getApplication()
+            $returnCode = $application
                 ->get('doctrine:cache:clear-result')
                 ->run(new ArrayInput([]), new NullOutput);
         }

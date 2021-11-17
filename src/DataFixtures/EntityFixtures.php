@@ -57,6 +57,9 @@ final class EntityFixtures extends BaseFixture implements
         $manager->flush();
     }
 
+    /**
+     * @return  \Generator<string>
+     */
     private static function getEntitiesOfUserProject(): \Generator
     {
         yield from [
@@ -66,6 +69,9 @@ final class EntityFixtures extends BaseFixture implements
         ];
     }
 
+    /**
+     * @return  \Generator<string>
+     */
     private static function getEntitiesOfAdminProject(): \Generator
     {
         yield from [self::ADMIN_PROJECT_ENTITY_NAME, 'Ingredients', 'Book'];
