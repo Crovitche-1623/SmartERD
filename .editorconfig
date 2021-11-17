@@ -24,10 +24,8 @@ trim_trailing_whitespace = false
 [*.sh]
 indent_style = tab
 
-[*.{yaml,yml}]
+[*.{yaml,yml,neon}]
 trim_trailing_whitespace = false
-
-[docker-compose.{yaml,yml}]
 indent_size = 2
 
 [Dockerfile]
